@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARC-3D Voxel Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main class="app">
+      <section class="stage" aria-label="ARC-3D voxel puzzle">
+        <div class="topbar">
+          <div class="tabs" role="tablist" aria-label="Puzzle selector">
+            <button class="tab is-active" data-puzzle="example" role="tab" aria-selected="true">Example</button>
+            <button class="tab" data-puzzle="test" role="tab" aria-selected="false">Test</button>
+          </div>
+
+          <div class="modes" role="group" aria-label="View mode">
+            <button class="mode is-active" data-mode="input">Input</button>
+            <button class="mode" data-mode="output">Output</button>
+            <button class="mode" data-mode="workspace">Workspace</button>
+          </div>
+
+          <label class="switch">
+            <input id="auto-rotate" type="checkbox" checked />
+            <span>Rotate</span>
+          </label>
+        </div>
+
+        <div id="scene" class="scene" role="img" aria-label="10 by 10 by 10 voxel puzzle scene"></div>
+
+        <div class="bottombar">
+          <div id="status-line" class="status">Example input</div>
+
+          <div id="test-tools" class="test-tools" hidden>
+            <div class="palette" role="group" aria-label="Paint color">
+              <button class="paint is-active green" data-paint="3" aria-label="Paint green"></button>
+              <button class="paint yellow" data-paint="4" aria-label="Paint yellow"></button>
+              <button class="paint erase" data-paint="erase" aria-label="Erase"></button>
+            </div>
+            <button id="check-answer" class="action">Check</button>
+            <button id="reset-answer" class="action">Reset</button>
+            <button id="reveal-answer" class="action">Reveal</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
