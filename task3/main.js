@@ -34,7 +34,29 @@ let selectedLabel = null;
 let testAnswerRevealed = false;
 
 const puzzles = {
-  example1: makePuzzle({
+    example1: makePuzzle({
+    voxels: [
+      { pos: [1, 4, 4], color: "#ff8a24" },
+      { pos: [2, 4, 4], color: "#ff8a24" },
+      { pos: [2, 3, 5], color: "#ff8a24" },
+      { pos: [2, 4, 5], color: "#ff8a24" },
+      { pos: [3, 4, 5], color: "#ff8a24" },
+      { pos: [3, 4, 4], color: "#ff8a24" },
+      { pos: [5, 4, 5], color: "#4bb763" },
+      { pos: [6, 4, 5], color: "#4bb763" },
+      { pos: [6, 3, 5], color: "#4bb763" },
+      { pos: [6, 4, 4], color: "#4bb763" },
+      { pos: [7, 4, 4], color: "#4bb763" },
+    ],
+    missing: [5, 4, 4],
+    candidates: [
+      { label: "A", anchor: [6, 4, 5], face: "+y" },
+      { label: "B", anchor: [5, 4, 5], face: "-z" },
+      { label: "C", anchor: [6, 3, 5], face: "-x" },
+      { label: "D", anchor: [6, 3, 5], face: "-z" },
+    ],
+  }),
+  example2: makePuzzle({
     voxels: [
       { pos: [2, 3, 4], color: "#ff8a24"},
       { pos: [2, 4, 4], color: "#ff8a24"},
@@ -56,25 +78,6 @@ const puzzles = {
       { label: "B", anchor: [6, 5, 4], face: "+z" },
       { label: "C", anchor: [5, 4, 5], face: "+y" },
       { label: "D", anchor: [7, 3, 4], face: "+z" },
-    ],
-  }),
-  example2: makePuzzle({
-    voxels: [
-      { pos: [2, 3, 5], color: "#ff8a24" },
-      { pos: [2, 4, 5], color: "#ff8a24" },
-      { pos: [3, 4, 5], color: "#ff8a24" },
-      { pos: [3, 4, 4], color: "#ff8a24" },
-      { pos: [5, 4, 5], color: "#4bb763" },
-      { pos: [6, 4, 5], color: "#4bb763" },
-      { pos: [6, 3, 5], color: "#4bb763" },
-      { pos: [6, 4, 4], color: "#4bb763" },
-    ],
-    missing: [5, 3, 5],
-    candidates: [
-      { label: "A", anchor: [5, 4, 5], face: "-y" },
-      { label: "B", anchor: [6, 3, 5], face: "+x" },
-      { label: "C", anchor: [3, 4, 5], face: "+z" },
-      { label: "D", anchor: [2, 3, 5], face: "-x" },
     ],
   }),
   test: makePuzzle({
@@ -117,7 +120,8 @@ camera.position.set(12, 11, 14);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.autoRotate = true;
+autoRotateInput.checked = false;
+controls.autoRotate = false;
 controls.autoRotateSpeed = 0.72;
 controls.target.set(0, 0, 0);
 

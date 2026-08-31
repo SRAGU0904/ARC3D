@@ -46,17 +46,20 @@ missingVoxels: [
 
 One entry means the user only needs to repair one block.
 
-Candidate labels define what the model is allowed to answer:
+Candidate labels define what the model is allowed to answer. Each label is
+attached to one face of an existing cube:
 
 ```js
 candidates: [
-  { label: "A", voxel: [4, 2, 4] },
-  { label: "B", voxel: [5, 3, 4] },
+  { label: "A", anchor: [4, 2, 3], face: "+z" },
+  { label: "B", anchor: [4, 3, 4], face: "+x" },
 ]
 ```
 
-If a candidate voxel is also in `missingVoxels`, it is a correct repair label.
-Otherwise it is a distractor.
+`anchor` is the existing cube carrying the label. `face` is the face where the
+label is attached. Selecting that label adds the repair cube outside that face.
+If that repair cube is also in `missingVoxels`, the label is correct; otherwise
+it is a distractor.
 
 ## Run locally
 

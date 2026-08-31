@@ -12,6 +12,14 @@ const COLORS = {
 const VOXEL_SIZE = 1;
 const GRID_SIZE = 10;
 const HALF = (GRID_SIZE - 1) / 2;
+const FACE_NORMALS = {
+  "+x": new THREE.Vector3(1, 0, 0),
+  "-x": new THREE.Vector3(-1, 0, 0),
+  "+y": new THREE.Vector3(0, 1, 0),
+  "-y": new THREE.Vector3(0, -1, 0),
+  "+z": new THREE.Vector3(0, 0, 1),
+  "-z": new THREE.Vector3(0, 0, -1),
+};
 
 const sceneEl = document.querySelector("#scene");
 const statusLine = document.querySelector("#status-line");
@@ -32,7 +40,7 @@ const puzzles = {
         min: [1, 1, 1],
         max: [4, 4, 4],
         missingVoxels: [
-          [4, 2, 4],
+          [4, 1, 4],
           [2, 4, 4],
         ],
       },
@@ -43,11 +51,11 @@ const puzzles = {
       },
     ],
     candidates: [
-      { label: "A", voxel: [4, 2, 4] },
-      { label: "B", voxel: [5, 3, 4] },
-      { label: "C", voxel: [2, 4, 4] },
-      { label: "D", voxel: [7, 5, 5] },
-      { label: "E", voxel: [8, 6, 5] },
+      { label: "A", anchor: [4, 1, 3], face: "+z" },
+      { label: "B", anchor: [3, 3, 4], face: "+z" },
+      { label: "C", anchor: [2, 4, 3], face: "+z" },
+      { label: "D", anchor: [7, 5, 4], face: "+z" },
+      { label: "E", anchor: [8, 5, 5], face: "+y" },
     ],
   }),
   example2: makePuzzle({
@@ -61,17 +69,17 @@ const puzzles = {
         min: [6, 3, 3],
         max: [8, 6, 6],
         missingVoxels: [
-          [6, 4, 6],
+          [7, 4, 6],
           [8, 5, 5],
         ],
       },
     ],
     candidates: [
-      { label: "A", voxel: [4, 4, 5] },
-      { label: "B", voxel: [5, 4, 5] },
-      { label: "C", voxel: [6, 4, 6] },
-      { label: "D", voxel: [8, 5, 5] },
-      { label: "E", voxel: [7, 7, 6] },
+      { label: "A", anchor: [1, 4, 3], face: "-x" },
+      { label: "B", anchor: [4, 4, 4], face: "+z" },
+      { label: "C", anchor: [7, 4, 5], face: "+z" },
+      { label: "D", anchor: [7, 5, 5], face: "+x" },
+      { label: "E", anchor: [7, 6, 6], face: "+y" },
     ],
   }),
   test: makePuzzle({
@@ -81,21 +89,21 @@ const puzzles = {
         max: [4, 5, 5],
         missingVoxels: [
           [1, 3, 5],
-          [3, 5, 5],
+          [4, 5, 5],
         ],
       },
       {
         min: [6, 1, 4],
-        max: [8, 4, 7],
-        missingVoxels: [[8, 3, 7]],
+        max: [7, 4, 7],
+        missingVoxels: [[7, 2, 5]],
       },
     ],
     candidates: [
-      { label: "A", voxel: [1, 3, 5] },
-      { label: "B", voxel: [5, 4, 5] },
-      { label: "C", voxel: [3, 5, 5] },
-      { label: "D", voxel: [8, 3, 7] },
-      { label: "E", voxel: [7, 5, 7] },
+      { label: "A", anchor: [7, 4, 7], face: "+y" },
+      { label: "B", anchor: [4, 4, 3], face: "+x" },
+      { label: "C", anchor: [4, 5, 4], face: "+z" },
+      { label: "D", anchor: [6, 2, 5], face: "+x" },
+      { label: "E", anchor: [1, 3, 4], face: "+z" },
     ],
   }),
 };
@@ -112,7 +120,8 @@ camera.position.set(12, 11, 14);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.autoRotate = true;
+autoRotateInput.checked = false;
+controls.autoRotate = false;
 controls.autoRotateSpeed = 0.72;
 controls.target.set(0, 0, 0);
 
@@ -211,8 +220,6 @@ function makePuzzle({ blocks, candidates }) {
     const missingInBlock = new Set(block.missingVoxels.map(([x, y, z]) => keyOf(x, y, z)));
 
     forEachVoxel(block.min, block.max, (x, y, z) => {
-      if (!isSurface([x, y, z], block)) return;
-
       const key = keyOf(x, y, z);
       if (missingInBlock.has(key)) {
         missing.add(key);
@@ -225,16 +232,10 @@ function makePuzzle({ blocks, candidates }) {
   });
 
   const answerLabels = new Set(
-    candidates.filter(({ voxel }) => missing.has(keyOf(...voxel))).map(({ label }) => label),
+    candidates.filter(({ anchor, face }) => missing.has(keyOf(...targetVoxel(anchor, face)))).map(({ label }) => label),
   );
 
   return { input, output, missing, candidates, answerLabels };
-}
-
-function isSurface([x, y, z], block) {
-  const [minX, minY, minZ] = block.min;
-  const [maxX, maxY, maxZ] = block.max;
-  return x === minX || x === maxX || y === minY || y === maxY || z === minZ || z === maxZ;
 }
 
 function render() {
@@ -251,7 +252,7 @@ function render() {
   if (activePuzzle === "test" && activeMode === "workspace") {
     selectedLabels.forEach((label) => {
       const candidate = puzzle.candidates.find((item) => item.label === label);
-      if (candidate) voxels.set(keyOf(...candidate.voxel), "repair");
+      if (candidate) voxels.set(keyOf(...targetVoxel(candidate.anchor, candidate.face)), "repair");
     });
   }
 
@@ -293,46 +294,45 @@ function addVoxel(voxel) {
 
 function addCandidateLabels(puzzle) {
   puzzle.candidates.forEach((candidate) => {
-    const selected = selectedLabels.has(candidate.label);
-    const label = makeLabelSprite(candidate.label, selected);
-    const [x, y, z] = candidate.voxel;
+    const label = makeFaceLabel(candidate.label, FACE_NORMALS[candidate.face]);
+    const [x, y, z] = candidate.anchor;
     label.position.copy(toPosition(x, y, z));
-    label.position.y += 0.08;
+    label.position.add(FACE_NORMALS[candidate.face].clone().multiplyScalar(0.506));
     label.userData.label = candidate.label;
     label.userData.isCandidateLabel = true;
     voxelGroup.add(label);
   });
 }
 
-function makeLabelSprite(text, selected) {
+function makeFaceLabel(text, normal) {
   const canvas = document.createElement("canvas");
   canvas.width = 160;
   canvas.height = 160;
   const context = canvas.getContext("2d");
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.beginPath();
-  context.arc(80, 80, 54, 0, Math.PI * 2);
-  context.fillStyle = selected ? COLORS.repair : COLORS.label;
-  context.fill();
-  context.lineWidth = 8;
-  context.strokeStyle = COLORS.edge;
-  context.stroke();
-  context.fillStyle = selected ? "#ffffff" : COLORS.labelText;
-  context.font = "bold 76px Arial";
+  context.fillStyle = "rgba(255, 255, 255, 0.86)";
+  context.fillRect(20, 20, 120, 120);
+  context.strokeStyle = "rgba(5, 5, 5, 0.75)";
+  context.lineWidth = 6;
+  context.strokeRect(20, 20, 120, 120);
+  context.fillStyle = COLORS.labelText;
+  context.font = "bold 92px Arial";
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.fillText(text, 80, 84);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
-  const material = new THREE.SpriteMaterial({
+  const geometry = new THREE.PlaneGeometry(0.72, 0.72);
+  const material = new THREE.MeshBasicMaterial({
     map: texture,
     transparent: true,
-    depthTest: false,
+    side: THREE.DoubleSide,
   });
-  const sprite = new THREE.Sprite(material);
-  sprite.scale.set(0.86, 0.86, 0.86);
-  return sprite;
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+  mesh.renderOrder = 2;
+  return mesh;
 }
 
 function renderCandidateButtons() {
@@ -364,6 +364,11 @@ function updateJson() {
   document.querySelectorAll(".candidate").forEach((button) => {
     button.classList.toggle("is-selected", selectedLabels.has(button.textContent));
   });
+}
+
+function targetVoxel(anchor, face) {
+  const normal = FACE_NORMALS[face];
+  return [anchor[0] + normal.x, anchor[1] + normal.y, anchor[2] + normal.z];
 }
 
 function buildBoundaryBox() {
