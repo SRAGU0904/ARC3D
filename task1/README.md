@@ -4,10 +4,6 @@ This folder contains a local webpage demo that extends the ARC-AGI-1 training
 task `543a7ed5` into a 3D voxel repair concept with one example and one test
 puzzle.
 
-The root page now works as a task browser. Open the project root and use the
-top navigation to switch between `task1`, `task2`, and `task3`. Each task page
-contains `Example 1`, `Example 2`, and `Test`.
-
 ## Source task
 
 - ARC-AGI-1 stores tasks as JSON files with `train` demonstration pairs and

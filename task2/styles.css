@@ -1,0 +1,256 @@
+:root {
+  --bg: #ece7dd;
+  --ink: #171918;
+  --muted: #5f6863;
+  --panel: rgba(255, 255, 255, 0.76);
+  --line: rgba(23, 25, 24, 0.16);
+  --orange: #ff8a24;
+  --green: #4bb763;
+  --blue: #2f72c4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background:
+    linear-gradient(120deg, rgba(47, 114, 196, 0.12), transparent 34%),
+    linear-gradient(300deg, rgba(255, 138, 36, 0.12), transparent 42%),
+    var(--bg);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  padding: 14px;
+}
+
+.stage {
+  min-height: calc(100vh - 28px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--panel);
+  box-shadow: 0 20px 70px rgba(49, 55, 52, 0.13);
+}
+
+.topbar,
+.bottombar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.topbar {
+  border-bottom: 1px solid var(--line);
+}
+
+.bottombar {
+  min-height: 58px;
+  border-top: 1px solid var(--line);
+}
+
+.tabs,
+.modes,
+.candidate-buttons {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid rgba(23, 25, 24, 0.2);
+  border-radius: 7px;
+}
+
+.tabs {
+  grid-template-columns: repeat(3, minmax(96px, 1fr));
+}
+
+.modes {
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+}
+
+.tab,
+.mode,
+.action {
+  min-height: 38px;
+  border: 0;
+  border-right: 1px solid rgba(23, 25, 24, 0.15);
+  color: #303733;
+  background: rgba(255, 255, 255, 0.62);
+  font-size: 14px;
+  font-weight: 730;
+}
+
+.tab:last-child,
+.mode:last-child {
+  border-right: 0;
+}
+
+.tab.is-active,
+.mode.is-active {
+  color: white;
+  background: #1f2522;
+}
+
+.mode:disabled {
+  color: rgba(48, 55, 51, 0.36);
+  cursor: default;
+}
+
+.switch {
+  min-height: 38px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #303733;
+  font-size: 14px;
+  font-weight: 730;
+}
+
+.switch input {
+  accent-color: #1f2522;
+}
+
+.scene {
+  position: relative;
+  min-height: 560px;
+  background:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.02)),
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.54), transparent 58%);
+}
+
+.scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 740;
+}
+
+.test-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.test-tools[hidden] {
+  display: none;
+}
+
+.candidate-buttons {
+  grid-auto-flow: column;
+  grid-auto-columns: 42px;
+}
+
+.candidate,
+.action {
+  min-width: 78px;
+  padding: 0 14px;
+  border: 1px solid rgba(23, 25, 24, 0.2);
+  border-radius: 7px;
+}
+
+.candidate {
+  min-width: 42px;
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid rgba(23, 25, 24, 0.15);
+  border-radius: 0;
+  color: #303733;
+  background: rgba(255, 255, 255, 0.68);
+  font-size: 14px;
+  font-weight: 820;
+}
+
+.candidate:last-child {
+  border-right: 0;
+}
+
+.candidate.is-selected {
+  color: white;
+  background: var(--blue);
+}
+
+.json-output {
+  min-width: 150px;
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid rgba(23, 25, 24, 0.16);
+  border-radius: 7px;
+  color: #25302b;
+  background: rgba(255, 255, 255, 0.68);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.action:active,
+.tab:active,
+.mode:active,
+.candidate:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding: 8px;
+  }
+
+  .stage {
+    min-height: calc(100vh - 16px);
+  }
+
+  .topbar,
+  .bottombar,
+  .test-tools {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tabs,
+  .modes,
+  .candidate-buttons,
+  .action {
+    width: 100%;
+  }
+
+  .candidate-buttons {
+    grid-auto-flow: initial;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .scene {
+    min-height: 480px;
+  }
+}
