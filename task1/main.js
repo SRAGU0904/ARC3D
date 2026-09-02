@@ -12,6 +12,25 @@ const COLORS = {
 const VOXEL_SIZE = 1;
 const GRID_SIZE = 10;
 const HALF = (GRID_SIZE - 1) / 2;
+const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
+const CAMERA_DISTANCE = 17;
+const INITIAL_VIEW_ID = "corner-nx-py-pz";
+const FIXED_VIEWS = {
+  "face-px": { label: "x+ y0 z0", dir: [1, 0, 0], text: "+X" },
+  "face-nx": { label: "x- y0 z0", dir: [-1, 0, 0], text: "-X" },
+  "face-py": { label: "x0 y+ z0", dir: [0, 1, 0], text: "+Y" },
+  "face-ny": { label: "x0 y- z0", dir: [0, -1, 0], text: "-Y" },
+  "face-pz": { label: "x0 y0 z+", dir: [0, 0, 1], text: "+Z" },
+  "face-nz": { label: "x0 y0 z-", dir: [0, 0, -1], text: "-Z" },
+  "corner-nx-py-pz": { label: "x- y+ z+", dir: [-1, 1, 1], text: "↖" },
+  "corner-px-py-pz": { label: "x+ y+ z+", dir: [1, 1, 1], text: "↗" },
+  "corner-nx-ny-pz": { label: "x- y- z+", dir: [-1, -1, 1], text: "↙" },
+  "corner-px-ny-pz": { label: "x+ y- z+", dir: [1, -1, 1], text: "↘" },
+  "corner-nx-py-nz": { label: "x- y+ z-", dir: [-1, 1, -1], text: "↖" },
+  "corner-px-py-nz": { label: "x+ y+ z-", dir: [1, 1, -1], text: "↗" },
+  "corner-nx-ny-nz": { label: "x- y- z-", dir: [-1, -1, -1], text: "↙" },
+  "corner-px-ny-nz": { label: "x+ y- z-", dir: [1, -1, -1], text: "↘" },
+};
 const FACE_NORMALS = {
   "+x": new THREE.Vector3(1, 0, 0),
   "-x": new THREE.Vector3(-1, 0, 0),
@@ -27,35 +46,44 @@ const autoRotateInput = document.querySelector("#auto-rotate");
 const testTools = document.querySelector("#test-tools");
 const candidateButtons = document.querySelector("#candidate-buttons");
 const jsonOutput = document.querySelector("#json-output");
+autoRotateInput.closest(".switch").hidden = true;
+const exportParams = new URLSearchParams(window.location.search);
+const exportMode = exportParams.get("export") === "fixed";
+const requestedPuzzle = exportParams.get("puzzle");
+const requestedView = exportParams.get("view");
+if (exportMode) document.documentElement.classList.add("is-exporting-fixed");
 
-let activePuzzle = "example1";
+let activePuzzle = ["example1", "example2", "test"].includes(requestedPuzzle) ? requestedPuzzle : "example1";
 let activeMode = "input";
 let selectedLabels = new Set();
 let testAnswerRevealed = false;
+let currentViewId = FIXED_VIEWS[requestedView] ? requestedView : INITIAL_VIEW_ID;
+let currentSideViewId = "face-pz";
+let viewMode = "fixed";
 
 const puzzles = {
   example1: makePuzzle({
     blocks: [
       {
-        min: [1, 1, 1],
-        max: [4, 4, 4],
+        min: [2, 1, 1],
+        max: [5, 4, 4],
         missingVoxels: [
-          [4, 1, 4],
-          [2, 4, 4],
+          [5, 1, 4],
+          [3, 4, 4],
         ],
       },
       {
-        min: [6, 2, 2],
-        max: [8, 5, 5],
+        min: [7, 2, 2],
+        max: [9, 5, 5],
         missingVoxels: [[7, 5, 5]],
       },
     ],
     candidates: [
-      { label: "A", anchor: [4, 1, 3], face: "+z" },
-      { label: "B", anchor: [3, 3, 4], face: "+z" },
-      { label: "C", anchor: [2, 4, 3], face: "+z" },
+      { label: "A", anchor: [5, 1, 3], face: "+z" },
+      { label: "B", anchor: [4, 3, 4], face: "+z" },
+      { label: "C", anchor: [3, 4, 3], face: "+z" },
       { label: "D", anchor: [7, 5, 4], face: "+z" },
-      { label: "E", anchor: [8, 5, 5], face: "+y" },
+      { label: "E", anchor: [9, 5, 5], face: "+y" },
     ],
   }),
   example2: makePuzzle({
@@ -116,14 +144,16 @@ sceneEl.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-camera.position.set(12, 11, 14);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+controls.enableRotate = false;
+controls.enablePan = false;
 autoRotateInput.checked = false;
 controls.autoRotate = false;
 controls.autoRotateSpeed = 0.72;
-controls.target.set(0, 0, 0);
+resetCamera();
+if (!exportMode) setupViewControls();
 
 scene.add(new THREE.HemisphereLight(0xfffbf2, 0x6f7774, 2.45));
 
@@ -139,6 +169,7 @@ scene.add(fillLight);
 const root = new THREE.Group();
 const voxelGroup = new THREE.Group();
 scene.add(root);
+root.position.y = 0.65;
 root.add(voxelGroup);
 
 const raycaster = new THREE.Raycaster();
@@ -147,6 +178,9 @@ const pointer = new THREE.Vector2();
 renderCandidateButtons();
 render();
 resize();
+if (exportMode) {
+  frameExportCamera();
+}
 animate();
 
 document.querySelectorAll(".tab").forEach((button) => {
@@ -157,6 +191,8 @@ document.querySelectorAll(".tab").forEach((button) => {
     testAnswerRevealed = false;
     renderCandidateButtons();
     setActiveButtons();
+    currentViewId = INITIAL_VIEW_ID;
+    resetCamera();
     render();
   });
 });
@@ -198,15 +234,6 @@ document.querySelector("#reveal-answer").addEventListener("click", () => {
 
 autoRotateInput.addEventListener("change", () => {
   controls.autoRotate = autoRotateInput.checked;
-});
-
-renderer.domElement.addEventListener("pointerdown", (event) => {
-  if (activePuzzle !== "test" || activeMode !== "workspace") return;
-
-  const hit = pickCandidate(event);
-  if (!hit) return;
-
-  toggleLabel(hit.object.userData.label);
 });
 
 window.addEventListener("resize", resize);
@@ -261,9 +288,7 @@ function render() {
     addVoxel({ x, y, z, kind });
   });
 
-  if (activeMode !== "output") {
-    addCandidateLabels(puzzle);
-  }
+  addCandidateLabels(puzzle);
 
   updateJson();
   setStatus();
@@ -449,4 +474,203 @@ function animate() {
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
+}
+
+function resetCamera() {
+  const view = FIXED_VIEWS[currentViewId] ?? FIXED_VIEWS[INITIAL_VIEW_ID];
+  camera.position.copy(viewDirection(view.dir).multiplyScalar(CAMERA_DISTANCE).add(INITIAL_CAMERA_TARGET));
+  camera.up.set(0, 1, 0);
+  controls.target.copy(INITIAL_CAMERA_TARGET);
+  controls.update();
+  updateViewControls();
+}
+
+function frameExportCamera() {
+  scene.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(voxelGroup);
+  if (box.isEmpty()) return;
+
+  const view = FIXED_VIEWS[currentViewId] ?? FIXED_VIEWS[INITIAL_VIEW_ID];
+  const direction = viewDirection(view.dir);
+  const center = box.getCenter(new THREE.Vector3());
+  const sphere = box.getBoundingSphere(new THREE.Sphere());
+  const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+  const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+  const fitFov = Math.min(verticalFov, horizontalFov);
+  const distance = (sphere.radius / Math.sin(fitFov / 2)) * 1.18;
+
+  camera.position.copy(center.clone().add(direction.multiplyScalar(distance)));
+  camera.up.set(0, 1, 0);
+  if (Math.abs(direction.y) > 0.98) camera.up.set(0, 0, 1);
+  camera.near = 0.1;
+  camera.far = Math.max(100, distance + sphere.radius * 4);
+  camera.updateProjectionMatrix();
+  controls.target.copy(center);
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+function viewDirection(dir) {
+  const adjusted = dir[0] === 0 && dir[2] === 0 ? [0, dir[1], 0.001] : dir;
+  return new THREE.Vector3(...adjusted).normalize();
+}
+
+function setupViewControls() {
+  const panel = document.createElement("div");
+  panel.className = "view-panel";
+  panel.innerHTML = `
+    <button class="view-mode-toggle" type="button">Free view</button>
+    <button class="view-arrow view-arrow-up-left" data-move="up-left" title="move up-left">↖</button>
+    <button class="view-arrow view-arrow-up" data-move="up" title="move up">↑</button>
+    <button class="view-arrow view-arrow-up-right" data-move="up-right" title="move up-right">↗</button>
+    <button class="view-arrow view-arrow-left" data-move="left" title="move left">←</button>
+    <button class="view-arrow view-arrow-right" data-move="right" title="move right">→</button>
+    <button class="view-arrow view-arrow-down-left" data-move="down-left" title="move down-left">↙</button>
+    <button class="view-arrow view-arrow-down" data-move="down" title="move down">↓</button>
+    <button class="view-arrow view-arrow-down-right" data-move="down-right" title="move down-right">↘</button>
+    <div class="view-readout" aria-live="polite"></div>
+  `;
+  sceneEl.appendChild(panel);
+  panel.querySelectorAll("[data-move]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nextViewId = getNextViewId(button.dataset.move);
+      if (!nextViewId || nextViewId === currentViewId) return;
+      setView(nextViewId);
+    });
+  });
+  panel.querySelector(".view-mode-toggle").addEventListener("click", () => {
+    setViewMode(viewMode === "fixed" ? "free" : "fixed");
+  });
+  updateViewControls();
+}
+
+function updateViewControls() {
+  const panel = sceneEl.querySelector(".view-panel");
+  if (!panel) return;
+  panel.classList.toggle("is-free", viewMode === "free");
+  panel.querySelectorAll("[data-move]").forEach((button) => {
+    const nextViewId = getNextViewId(button.dataset.move);
+    button.disabled = viewMode === "free" || !nextViewId || nextViewId === currentViewId;
+  });
+  panel.querySelector(".view-mode-toggle").textContent = viewMode === "fixed" ? "Free view" : "Fixed view";
+  panel.querySelector(".view-readout").textContent =
+    viewMode === "fixed" ? `view: ${FIXED_VIEWS[currentViewId].label}` : "view: free drag";
+}
+
+function setView(viewId) {
+  currentViewId = viewId;
+  if (!isPureVertical(viewId)) {
+    const [x, , z] = FIXED_VIEWS[viewId].dir;
+    currentSideViewId = sideFromHorizontal(x, z);
+  }
+  resetCamera();
+}
+
+function setViewMode(mode) {
+  viewMode = mode;
+  controls.enableRotate = mode === "free";
+  controls.enablePan = false;
+  if (mode === "fixed") resetCamera();
+  updateViewControls();
+}
+
+function getNextViewId(move) {
+  const view = FIXED_VIEWS[currentViewId];
+  const [x, y, z] = view.dir;
+
+  if (isCornerView(currentViewId)) {
+    if (move === "up") return y > 0 ? null : cornerByVector(x, 1, z);
+    if (move === "down") return y < 0 ? null : cornerByVector(x, -1, z);
+    if (move === "left") return rotateSideOrCorner(currentViewId, -1);
+    if (move === "right") return rotateSideOrCorner(currentViewId, 1);
+    if (move === "up-left" || move === "up-right") return y > 0 ? null : centerFaceFromCornerMove(move, x, z);
+    if (move === "down-left" || move === "down-right") return y < 0 ? null : centerFaceFromCornerMove(move, x, z);
+    return null;
+  }
+
+  const side = isSideFace(currentViewId) ? currentViewId : currentSideViewId;
+  const leftSide = rotateSide(side, -1);
+  const rightSide = rotateSide(side, 1);
+
+  if (move === "left") return isPureVertical(currentViewId) ? null : rotateSideOrCorner(currentViewId, -1);
+  if (move === "right") return isPureVertical(currentViewId) ? null : rotateSideOrCorner(currentViewId, 1);
+
+  if (move === "up") {
+    if (y > 0) return null;
+    return y < 0 ? side : "face-py";
+  }
+  if (move === "down") {
+    if (y < 0) return null;
+    return y > 0 ? side : "face-ny";
+  }
+  if (move === "up-left") return y > 0 ? null : cornerForSide(leftSide, 1);
+  if (move === "up-right") return y > 0 ? null : cornerForSide(rightSide, 1);
+  if (move === "down-left") return y < 0 ? null : cornerForSide(leftSide, -1);
+  if (move === "down-right") return y < 0 ? null : cornerForSide(rightSide, -1);
+  return null;
+}
+
+function centerFaceFromCornerMove(move, x, z) {
+  const movesTowardXCenter = (move.endsWith("right") && x < 0) || (move.endsWith("left") && x > 0);
+  return movesTowardXCenter ? faceForZ(z) : faceForX(x);
+}
+
+function rotateSideOrCorner(viewId, direction) {
+  if (isSideFace(viewId)) return rotateSide(viewId, direction);
+  const [x, y, z] = FIXED_VIEWS[viewId].dir;
+  const [nextX, nextZ] = rotateHorizontal(x, z, direction);
+  return cornerByVector(nextX, y, nextZ);
+}
+
+function rotateHorizontal(x, z, direction) {
+  return direction > 0 ? [z, -x] : [-z, x];
+}
+
+function rotateSide(sideViewId, direction) {
+  const sides = ["face-pz", "face-px", "face-nz", "face-nx"];
+  const index = sides.indexOf(sideViewId);
+  return sides[(index + direction + sides.length) % sides.length];
+}
+
+function cornerForSide(sideViewId, y) {
+  const side = FIXED_VIEWS[sideViewId].dir;
+  const z = side[2] || (sideViewId === "face-px" || sideViewId === "face-nx" ? 1 : side[2]);
+  const x = side[0] || (sideViewId === "face-pz" || sideViewId === "face-nz" ? -1 : side[0]);
+  const key = vectorKey([x, y, z]);
+  return Object.keys(FIXED_VIEWS).find((id) => vectorKey(FIXED_VIEWS[id].dir) === key);
+}
+
+function cornerByVector(x, y, z) {
+  const key = vectorKey([x, y, z]);
+  return Object.keys(FIXED_VIEWS).find((id) => vectorKey(FIXED_VIEWS[id].dir) === key);
+}
+
+function sideFromHorizontal(x, z) {
+  if (Math.abs(z) >= Math.abs(x)) return z >= 0 ? "face-pz" : "face-nz";
+  return x >= 0 ? "face-px" : "face-nx";
+}
+
+function faceForX(x) {
+  return x >= 0 ? "face-px" : "face-nx";
+}
+
+function faceForZ(z) {
+  return z >= 0 ? "face-pz" : "face-nz";
+}
+
+function isSideFace(viewId) {
+  return ["face-pz", "face-px", "face-nz", "face-nx"].includes(viewId);
+}
+
+function isCornerView(viewId) {
+  const [x, y, z] = FIXED_VIEWS[viewId].dir;
+  return x !== 0 && y !== 0 && z !== 0;
+}
+
+function isPureVertical(viewId) {
+  return viewId === "face-py" || viewId === "face-ny";
+}
+
+function vectorKey(dir) {
+  return dir.join(",");
 }

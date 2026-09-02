@@ -16,7 +16,8 @@
 html,
 body {
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -41,15 +42,18 @@ button {
 }
 
 .app {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
   display: grid;
-  padding: 14px;
+  align-content: start;
+  padding: 8px;
 }
 
 .stage {
-  min-height: calc(100vh - 28px);
+  height: min(620px, calc(100vh - 16px));
+  min-height: 0;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
@@ -64,12 +68,20 @@ button {
   gap: 12px;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
+  padding: 10px 12px;
   background: rgba(255, 255, 255, 0.72);
 }
 
 .topbar {
+  position: relative;
+  min-height: 60px;
   border-bottom: 1px solid var(--line);
+}
+
+.topbar .modes {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .bottombar {
@@ -123,8 +135,8 @@ button {
 }
 
 .switch {
+  display: none;
   min-height: 38px;
-  display: flex;
   gap: 8px;
   align-items: center;
   color: #303733;
@@ -138,7 +150,7 @@ button {
 
 .scene {
   position: relative;
-  min-height: 560px;
+  min-height: 0;
   background:
     linear-gradient(0deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.02)),
     radial-gradient(circle at 50% 46%, rgba(255, 255, 255, 0.54), transparent 58%);
@@ -148,6 +160,179 @@ button {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.view-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  display: grid;
+  gap: 6px;
+  max-width: 220px;
+  padding: 8px;
+  border: 1px solid rgba(23, 25, 24, 0.16);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 10px 30px rgba(23, 25, 24, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.view-section {
+  display: grid;
+  gap: 4px;
+}
+
+.view-title,
+.view-readout {
+  color: #303733;
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.view-row {
+  display: grid;
+  grid-template-columns: repeat(4, 28px);
+  gap: 4px;
+}
+
+.view-faces {
+  grid-template-columns: repeat(6, 28px);
+}
+
+.view-button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(23, 25, 24, 0.18);
+  border-radius: 6px;
+  color: #222825;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 820;
+  line-height: 1;
+}
+
+.view-button.is-active {
+  color: white;
+  background: #1f2522;
+}
+
+.view-panel {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+.view-arrow {
+  position: absolute;
+  z-index: 5;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(23, 25, 24, 0.2);
+  border-radius: 999px;
+  color: #1f2522;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 28px rgba(23, 25, 24, 0.14);
+  font-size: 24px;
+  font-weight: 820;
+  line-height: 1;
+  pointer-events: auto;
+}
+
+.view-arrow:disabled {
+  opacity: 0.22;
+  cursor: default;
+}
+
+.view-arrow-up {
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.view-arrow-down {
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.view-arrow-left {
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+}
+
+.view-arrow-right {
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+}
+
+.view-arrow-up-left {
+  top: 12px;
+  left: 12px;
+}
+
+.view-arrow-up-right {
+  top: 12px;
+  right: 12px;
+}
+
+.view-arrow-down-left {
+  bottom: 12px;
+  left: 12px;
+}
+
+.view-arrow-down-right {
+  right: 12px;
+  bottom: 12px;
+}
+
+.view-readout {
+  position: absolute;
+  top: 66px;
+  right: 12px;
+  z-index: 5;
+  padding: 8px 10px;
+  border: 1px solid rgba(23, 25, 24, 0.16);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 28px rgba(23, 25, 24, 0.1);
+  pointer-events: none;
+}
+
+.view-mode-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 6;
+  min-width: 92px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(23, 25, 24, 0.2);
+  border-radius: 7px;
+  color: white;
+  background: #1f2522;
+  box-shadow: 0 10px 28px rgba(23, 25, 24, 0.14);
+  font-size: 13px;
+  font-weight: 800;
+  pointer-events: auto;
+}
+
+.view-panel.is-free .view-arrow {
+  display: none;
 }
 
 .status {
@@ -222,13 +407,45 @@ button {
   transform: translateY(1px);
 }
 
+html.is-exporting-fixed,
+html.is-exporting-fixed body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+html.is-exporting-fixed .app {
+  height: 100vh;
+  padding: 0;
+}
+
+html.is-exporting-fixed .stage {
+  height: 100vh;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+html.is-exporting-fixed .topbar,
+html.is-exporting-fixed .bottombar,
+html.is-exporting-fixed .view-panel {
+  display: none;
+}
+
+html.is-exporting-fixed .scene {
+  min-height: 100vh;
+}
+
 @media (max-width: 720px) {
   .app {
     padding: 8px;
   }
 
   .stage {
-    min-height: calc(100vh - 16px);
+    height: calc(100vh - 16px);
   }
 
   .topbar,
@@ -251,6 +468,6 @@ button {
   }
 
   .scene {
-    min-height: 480px;
+    min-height: 0;
   }
 }

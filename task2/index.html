@@ -5,6 +5,155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ARC-3D Task 2</title>
     <link rel="stylesheet" href="./styles.css" />
+    <style>
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .app {
+        height: 100vh;
+        min-height: 0;
+        align-content: start;
+        padding: 8px;
+      }
+
+      .stage {
+        height: min(1320px, calc(100vh - 16px));
+        min-height: 0;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .scene {
+        min-height: 0;
+      }
+
+      .switch {
+        display: none;
+      }
+
+      .topbar {
+        position: relative;
+        min-height: 60px;
+      }
+
+      .topbar .modes {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .view-panel {
+        position: absolute;
+        inset: 0;
+        display: block;
+        pointer-events: none;
+      }
+
+      .view-arrow {
+        position: absolute;
+        z-index: 5;
+        width: 46px;
+        height: 46px;
+        border: 1px solid rgba(23, 25, 24, 0.2);
+        border-radius: 999px;
+        color: #1f2522;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 10px 28px rgba(23, 25, 24, 0.14);
+        font-size: 24px;
+        font-weight: 820;
+        line-height: 1;
+        pointer-events: auto;
+      }
+
+      .view-arrow:disabled {
+        opacity: 0.22;
+        cursor: default;
+      }
+
+      .view-arrow-up {
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .view-arrow-down {
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .view-arrow-left {
+        top: 50%;
+        left: 12px;
+        transform: translateY(-50%);
+      }
+
+      .view-arrow-right {
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+      }
+
+      .view-arrow-up-left {
+        top: 12px;
+        left: 12px;
+      }
+
+      .view-arrow-up-right {
+        top: 12px;
+        right: 12px;
+      }
+
+      .view-arrow-down-left {
+        bottom: 12px;
+        left: 12px;
+      }
+
+      .view-arrow-down-right {
+        right: 12px;
+        bottom: 12px;
+      }
+
+      .view-readout {
+        position: absolute;
+        top: 66px;
+        right: 12px;
+        z-index: 5;
+        padding: 8px 10px;
+        border: 1px solid rgba(23, 25, 24, 0.16);
+        border-radius: 7px;
+        color: #303733;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 10px 28px rgba(23, 25, 24, 0.1);
+        font-size: 11px;
+        font-weight: 760;
+        pointer-events: none;
+      }
+
+      .view-mode-toggle {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 6;
+        min-width: 92px;
+        height: 36px;
+        padding: 0 12px;
+        border: 1px solid rgba(23, 25, 24, 0.2);
+        border-radius: 7px;
+        color: white;
+        background: #1f2522;
+        box-shadow: 0 10px 28px rgba(23, 25, 24, 0.14);
+        font-size: 13px;
+        font-weight: 800;
+        pointer-events: auto;
+      }
+
+      .view-panel.is-free .view-arrow {
+        display: none;
+      }
+    </style>
     <script type="importmap">
       {
         "imports": {
@@ -52,6 +201,6 @@
       </section>
     </main>
 
-    <script type="module" src="./main.js"></script>
+    <script type="module" src="./main.js?v=20260901-fixed-export-frame2"></script>
   </body>
 </html>

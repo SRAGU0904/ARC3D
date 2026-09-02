@@ -1,0 +1,28 @@
+{
+  "created_at": "2026-09-01T13:03:21.737301+00:00",
+  "task_id": "task1",
+  "model": "gpt-5",
+  "max_output_tokens": 64,
+  "view_policy": "all",
+  "image_detail": "auto",
+  "examples": [
+    "example1",
+    "example2"
+  ],
+  "test": "test",
+  "raw_output": "",
+  "api_response": {
+    "dry_run": true,
+    "message_count": 5
+  },
+  "predicted": [],
+  "expected": [
+    "C",
+    "D",
+    "E"
+  ],
+  "correct": null,
+  "accuracy": null,
+  "evaluation_skipped": true,
+  "result_path": "/Users/ruyinfeng/Desktop/axa repo/ARC3D/benchmark_results/task1_gpt-5_20260901T130321Z.json"
+}

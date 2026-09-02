@@ -1,0 +1,34 @@
+{
+  "generatedAt": "2026-09-01T13:39:52.956Z",
+  "imageSize": [
+    1024,
+    1024
+  ],
+  "viewOrder": [
+    "face-px",
+    "face-nx",
+    "face-py",
+    "face-ny",
+    "face-pz",
+    "face-nz",
+    "corner-nx-py-pz",
+    "corner-px-py-pz",
+    "corner-nx-ny-pz",
+    "corner-px-ny-pz",
+    "corner-nx-py-nz",
+    "corner-px-py-nz",
+    "corner-nx-ny-nz",
+    "corner-px-ny-nz"
+  ],
+  "tasks": [
+    "task1",
+    "task2",
+    "task3"
+  ],
+  "puzzles": [
+    "example1",
+    "example2",
+    "test"
+  ],
+  "source": "ARC3D current puzzle data; fixed views; orthographic auto-fit; puzzle canvas only; no webpage controls/arrows"
+}
