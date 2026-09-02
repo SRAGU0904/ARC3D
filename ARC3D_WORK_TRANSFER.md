@@ -24,7 +24,7 @@
 
 不要迁移或公开：
 
-- `OPENAI_API_KEY`
+- `AZURE_OPENAI_API_KEY`
 - 任何本地 shell history 里的 key
 
 ## 当前项目目标
@@ -135,7 +135,7 @@ arc3d_benchmark/
 - `arc3d_benchmark/test_input.py`：组织 test input
 - `arc3d_benchmark/payload.py`：把本地图片编码成 API payload
 - `arc3d_benchmark/prompts.py`：构建给模型的 prompt
-- `arc3d_benchmark/model_client.py`：调用 OpenAI Responses API
+- `arc3d_benchmark/model_client.py`：调用 Azure OpenAI Responses API v1
 - `arc3d_benchmark/evaluation.py`：解析模型答案并评估正确性
 - `arc3d_benchmark/runner.py`：串联 load -> prompt -> model -> evaluation -> result
 
@@ -147,34 +147,36 @@ arc3d_benchmark/
 cd "/Users/ruyinfeng/Desktop/axa repo/ARC3D"
 ```
 
-设置 API key：
+设置 Azure OpenAI 配置：
 
 ```sh
-export OPENAI_API_KEY="你的 OpenAI API key"
+export AZURE_OPENAI_ENDPOINT="https://YOUR-RESOURCE-NAME.openai.azure.com"
+export AZURE_OPENAI_DEPLOYMENT="YOUR-DEPLOYMENT-NAME"
+export AZURE_OPENAI_API_KEY="你的 Azure OpenAI API key"
 ```
 
 运行 task1：
 
 ```sh
-python3 benchmark_main.py --task 1 --model gpt-5.6-sol
+python3 benchmark_main.py --task 1
 ```
 
 运行 task2：
 
 ```sh
-python3 benchmark_main.py --task 2 --model gpt-5.6-sol
+python3 benchmark_main.py --task 2
 ```
 
 运行 task3：
 
 ```sh
-python3 benchmark_main.py --task 3 --model gpt-5.6-sol
+python3 benchmark_main.py --task 3
 ```
 
 设置输出 token 上限：
 
 ```sh
-python3 benchmark_main.py --task 1 --model gpt-5.6-sol --max-output-tokens 128
+python3 benchmark_main.py --task 1 --max-output-tokens 128
 ```
 
 默认输出 token 上限是：
@@ -262,18 +264,20 @@ cd "新电脑上的/ARC3D"
 python3 benchmark_main.py --task 1 --dry-run
 ```
 
-4. 如果 dry-run 正常，再设置新的 API key：
+4. 如果 dry-run 正常，再设置 Azure OpenAI 配置：
 
 ```sh
-export OPENAI_API_KEY="新的 key"
+export AZURE_OPENAI_ENDPOINT="https://YOUR-RESOURCE-NAME.openai.azure.com"
+export AZURE_OPENAI_DEPLOYMENT="YOUR-DEPLOYMENT-NAME"
+export AZURE_OPENAI_API_KEY="新的 key"
 ```
 
 5. 正式运行：
 
 ```sh
-python3 benchmark_main.py --task 1 --model gpt-5.6-sol
-python3 benchmark_main.py --task 2 --model gpt-5.6-sol
-python3 benchmark_main.py --task 3 --model gpt-5.6-sol
+python3 benchmark_main.py --task 1
+python3 benchmark_main.py --task 2
+python3 benchmark_main.py --task 3
 ```
 
 ## 新账号继续工作时可以直接给 Codex 的提示
@@ -291,4 +295,3 @@ python3 benchmark_main.py --task 3 --model gpt-5.6-sol
 - 后续可以实现 interactive view policy：先给 `face-nz`，模型通过 action 请求更多视角。
 - 可以增加 batch runner，一次跑 task1/task2/task3 并汇总 average accuracy。
 - 可以增加 prompt version 字段，方便比较不同 prompt 对 benchmark 结果的影响。
-

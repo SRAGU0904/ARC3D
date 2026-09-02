@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from .config import BenchmarkConfig
 from .dataset import load_task
 from .evaluation import evaluate
-from .model_client import call_openai, output_text
+from .model_client import call_azure_openai, output_text
 from .prompts import build_input
 
 
@@ -27,7 +27,12 @@ def run_benchmark(config: BenchmarkConfig) -> dict:
             "evaluation_skipped": True,
         }
     else:
-        raw_response = call_openai(config.model, messages, config.max_output_tokens)
+        raw_response = call_azure_openai(
+            config.azure_endpoint,
+            config.model,
+            messages,
+            config.max_output_tokens,
+        )
         raw_text = output_text(raw_response)
         metrics = evaluate(raw_text, task.test.answer, config.candidate_labels)
         metrics["evaluation_skipped"] = False

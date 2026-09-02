@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .dataset import PuzzleCase
-from .payload import image_part
+from .payload import labeled_image_parts
 
 
 def test_content(test: PuzzleCase, detail: str, view_policy: str) -> list[dict]:
@@ -19,5 +19,5 @@ def test_content(test: PuzzleCase, detail: str, view_policy: str) -> list[dict]:
             ),
         }
     ]
-    content.extend(image_part(path, detail) for path in test.images)
+    content.extend(labeled_image_parts(test.images, detail))
     return content

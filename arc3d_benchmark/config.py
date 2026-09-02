@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import os
 from pathlib import Path
 
 
@@ -26,7 +27,8 @@ DEFAULT_VIEWS = [
 class BenchmarkConfig:
     root: Path
     task_id: str
-    model: str = "gpt-5"
+    model: str = field(default_factory=lambda: os.environ.get("AZURE_OPENAI_DEPLOYMENT", ""))
+    azure_endpoint: str = field(default_factory=lambda: os.environ.get("AZURE_OPENAI_ENDPOINT", ""))
     max_output_tokens: int = 64
     image_detail: str = "auto"
     view_policy: str = "all"
