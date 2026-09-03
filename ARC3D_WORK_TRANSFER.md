@@ -17,7 +17,7 @@
 - `task1/`, `task2/`, `task3/`
 - `rendered_puzzle_images/`
 - `arc3d_benchmark/`
-- `benchmark_main.py`
+- `arc3d_benchmark/benchmark_main.py`
 - `benchmark_results/`
 - `README.md`
 - `ARC3D_WORK_TRANSFER.md`
@@ -122,13 +122,12 @@ A,C,D
 Benchmark 程序位于：
 
 ```text
-benchmark_main.py
 arc3d_benchmark/
 ```
 
 模块结构：
 
-- `benchmark_main.py`：命令行入口，配置 task、model、token 上限、view policy 等
+- `arc3d_benchmark/benchmark_main.py`：命令行入口，配置 task、model、token 上限、view policy 等
 - `arc3d_benchmark/config.py`：默认配置，包括 14 个 fixed view、默认 token 上限
 - `arc3d_benchmark/dataset.py`：读取图片和 `answer.txt`
 - `arc3d_benchmark/examples.py`：组织 examples
@@ -147,52 +146,50 @@ arc3d_benchmark/
 cd "/Users/ruyinfeng/Desktop/axa repo/ARC3D"
 ```
 
-设置 Azure OpenAI 配置：
+设置 Azure OpenAI API key（endpoint 和 deployment 已写在 `arc3d_benchmark/config.py`）：
 
 ```sh
-export AZURE_OPENAI_ENDPOINT="https://YOUR-RESOURCE-NAME.openai.azure.com"
-export AZURE_OPENAI_DEPLOYMENT="YOUR-DEPLOYMENT-NAME"
 export AZURE_OPENAI_API_KEY="你的 Azure OpenAI API key"
 ```
 
 运行 task1：
 
 ```sh
-python3 benchmark_main.py --task 1
+python3 -m arc3d_benchmark.benchmark_main --task 1
 ```
 
 运行 task2：
 
 ```sh
-python3 benchmark_main.py --task 2
+python3 -m arc3d_benchmark.benchmark_main --task 2
 ```
 
 运行 task3：
 
 ```sh
-python3 benchmark_main.py --task 3
+python3 -m arc3d_benchmark.benchmark_main --task 3
 ```
 
 设置输出 token 上限：
 
 ```sh
-python3 benchmark_main.py --task 1 --max-output-tokens 128
+python3 -m arc3d_benchmark.benchmark_main --task 1 --max-output-tokens 30000
 ```
 
 默认输出 token 上限是：
 
 ```text
-64
+20000
 ```
 
-因为模型只需要输出 `A/B/C/D/E`，通常 64 足够。
+该上限包含模型的 reasoning tokens。即使最终只输出 `A/B/C/D/E`，也需要为内部推理保留足够空间。
 
 ## Dry Run
 
 不调用 API，只检查图片路径、prompt 和 answer 是否能正常读取：
 
 ```sh
-python3 benchmark_main.py --task 1 --dry-run
+python3 -m arc3d_benchmark.benchmark_main --task 1 --dry-run
 ```
 
 预期输出类似：
@@ -261,23 +258,21 @@ benchmark_results/
 
 ```sh
 cd "新电脑上的/ARC3D"
-python3 benchmark_main.py --task 1 --dry-run
+python3 -m arc3d_benchmark.benchmark_main --task 1 --dry-run
 ```
 
-4. 如果 dry-run 正常，再设置 Azure OpenAI 配置：
+4. 如果 dry-run 正常，再设置 Azure OpenAI API key：
 
 ```sh
-export AZURE_OPENAI_ENDPOINT="https://YOUR-RESOURCE-NAME.openai.azure.com"
-export AZURE_OPENAI_DEPLOYMENT="YOUR-DEPLOYMENT-NAME"
 export AZURE_OPENAI_API_KEY="新的 key"
 ```
 
 5. 正式运行：
 
 ```sh
-python3 benchmark_main.py --task 1
-python3 benchmark_main.py --task 2
-python3 benchmark_main.py --task 3
+python3 -m arc3d_benchmark.benchmark_main --task 1
+python3 -m arc3d_benchmark.benchmark_main --task 2
+python3 -m arc3d_benchmark.benchmark_main --task 3
 ```
 
 ## 新账号继续工作时可以直接给 Codex 的提示
@@ -285,7 +280,7 @@ python3 benchmark_main.py --task 3
 可以把下面这段发给新 Codex：
 
 ```text
-请先完整阅读当前 ARC3D 项目，尤其是 ARC3D_WORK_TRANSFER.md、benchmark_main.py、arc3d_benchmark/、rendered_puzzle_images/、task1/task2/task3。这个项目是一个受 ARC 启发的 3D puzzle benchmark。当前 benchmark 已支持一次只测试一个 task，输入为每个 puzzle 的 14 张 fixed-view PNG，examples 带 answer，test 不在 prompt 中显示 answer，evaluation 会比较模型输出的 A/B/C/D/E，且多选顺序无关。请先运行 python3 benchmark_main.py --task 1 --dry-run 确认环境，然后继续协助我完善 benchmark。
+请先完整阅读当前 ARC3D 项目，尤其是 ARC3D_WORK_TRANSFER.md、arc3d_benchmark/、rendered_puzzle_images/、task1/task2/task3。这个项目是一个受 ARC 启发的 3D puzzle benchmark。当前 benchmark 已支持一次只测试一个 task，输入为每个 puzzle 的 14 张 fixed-view PNG，examples 带 answer，test 不在 prompt 中显示 answer，evaluation 会比较模型输出的 A/B/C/D/E，且多选顺序无关。请先运行 python3 -m arc3d_benchmark.benchmark_main --task 1 --dry-run 确认环境，然后继续协助我完善 benchmark。
 ```
 
 ## 目前建议的下一步

@@ -1,8 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-import os
 from pathlib import Path
+
+
+DEFAULT_AZURE_RESPONSES_URL = (
+    "https://ch-interns-gpt4.openai.azure.com"
+    "/openai/responses?api-version=2025-04-01-preview"
+)
+DEFAULT_AZURE_DEPLOYMENT = "gpt-5.6-sol"
+DEFAULT_MAX_OUTPUT_TOKENS = 30_000
 
 
 DEFAULT_VIEWS = [
@@ -27,9 +34,9 @@ DEFAULT_VIEWS = [
 class BenchmarkConfig:
     root: Path
     task_id: str
-    model: str = field(default_factory=lambda: os.environ.get("AZURE_OPENAI_DEPLOYMENT", ""))
-    azure_endpoint: str = field(default_factory=lambda: os.environ.get("AZURE_OPENAI_ENDPOINT", ""))
-    max_output_tokens: int = 64
+    model: str = DEFAULT_AZURE_DEPLOYMENT
+    azure_endpoint: str = DEFAULT_AZURE_RESPONSES_URL
+    max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS
     image_detail: str = "auto"
     view_policy: str = "all"
     output_dir: Path = Path("benchmark_results")

@@ -2,17 +2,20 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 
 from .model_client import call_azure_openai, output_text
 from .payload import image_part
 
 
-DEFAULT_IMAGE = Path("rendered_puzzle_images/task1/test/face-nz.png")
+DEFAULT_IMAGE = Path("rendered_puzzle_images/task1/example1_v1/corner-nx-ny-pz.png")
+AZURE_RESPONSES_URL = (
+    "https://ch-interns-gpt4.openai.azure.com"
+    "/openai/responses?api-version=2025-04-01-preview"
+)
+AZURE_DEPLOYMENT = "gpt-5.6-sol"
 DEFAULT_PROMPT = (
-    "Describe exactly what you can see in this ARC3D puzzle image. "
-    "Mention the voxel structure, colors, visible labels, and spatial arrangement."
+    "Describe exactly what you can see in this image. "
 )
 
 
@@ -36,18 +39,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-output-tokens",
         type=int,
-        default=300,
+        default=4000,
         help="Maximum output tokens, including reasoning tokens.",
     )
     parser.add_argument(
         "--model",
-        default=os.environ.get("AZURE_OPENAI_DEPLOYMENT", ""),
-        help="Azure deployment name (defaults to AZURE_OPENAI_DEPLOYMENT).",
+        default=AZURE_DEPLOYMENT,
+        help=f"Azure deployment name (default: {AZURE_DEPLOYMENT}).",
     )
     parser.add_argument(
         "--azure-endpoint",
-        default=os.environ.get("AZURE_OPENAI_ENDPOINT", ""),
-        help="Azure endpoint (defaults to AZURE_OPENAI_ENDPOINT).",
+        default=AZURE_RESPONSES_URL,
+        help="Complete Azure Responses API URL.",
     )
     parser.add_argument(
         "--save-response",

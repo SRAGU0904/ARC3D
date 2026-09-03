@@ -8,6 +8,8 @@ import urllib.request
 
 def responses_url(endpoint: str) -> str:
     normalized = endpoint.rstrip("/")
+    if "/openai/responses?" in normalized or normalized.endswith("/openai/responses"):
+        return normalized
     if normalized.endswith("/openai/v1/responses"):
         return normalized
     if normalized.endswith("/openai/v1"):

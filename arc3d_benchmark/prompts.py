@@ -9,9 +9,11 @@ from .test_input import test_content
 SYSTEM_PROMPT = (
     "You are solving 3D visual reasoning puzzles. "
     "Use the two solved examples to infer the rule, then answer the test. "
-    "Return only JSON in this exact shape: {\"answer\":[\"A\"]}. "
+    "First provide a concise explanation of the inferred rule, your approach, "
+    "and the key visual evidence supporting your choice. "
     "For multi-select tasks, include every selected letter in the array. "
-    "Do not include explanation."
+    "End with a separate final line in this exact format: "
+    "FINAL_ANSWER: {\"answer\":[\"A\"]}."
 )
 
 
@@ -43,7 +45,10 @@ def build_input(task: TaskCase, config: BenchmarkConfig) -> list[dict]:
             "content": [
                 {
                     "type": "input_text",
-                    "text": "Choose from A, B, C, D, and E if visible. Output JSON only.",
+                    "text": (
+                        "Choose from A, B, C, D, and E if visible. Explain your solution "
+                        "concisely, then end with FINAL_ANSWER followed by the answer JSON."
+                    ),
                 }
             ],
         }

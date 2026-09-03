@@ -36,6 +36,7 @@ def run_benchmark(config: BenchmarkConfig) -> dict:
         raw_text = output_text(raw_response)
         metrics = evaluate(raw_text, task.test.answer, config.candidate_labels)
         metrics["evaluation_skipped"] = False
+    usage = raw_response.get("usage") or {}
     result = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "task_id": config.task_id,
@@ -46,6 +47,7 @@ def run_benchmark(config: BenchmarkConfig) -> dict:
         "examples": [case.name for case in task.examples],
         "test": task.test.name,
         "raw_output": raw_text,
+        "usage": usage,
         "api_response": raw_response,
         **metrics,
     }

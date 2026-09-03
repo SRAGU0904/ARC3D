@@ -3,15 +3,14 @@
 Run one ARC3D task at a time from rendered puzzle images using Azure OpenAI.
 
 ```sh
-export AZURE_OPENAI_ENDPOINT="https://YOUR-RESOURCE-NAME.openai.azure.com"
-export AZURE_OPENAI_DEPLOYMENT="YOUR-DEPLOYMENT-NAME"
 export AZURE_OPENAI_API_KEY="..."
-python3 benchmark_main.py --task 1
+python3 -m arc3d_benchmark.benchmark_main --task 1
 ```
 
-`AZURE_OPENAI_DEPLOYMENT` is the deployment name configured in Azure, which may
-differ from the underlying model name. You can override it with `--model` and
-override the endpoint with `--azure-endpoint`.
+The Azure Responses URL and the `gpt-5.6-sol` deployment are configured in
+`arc3d_benchmark/config.py`. Only the API key is read from the environment.
+You can still override the deployment with `--model` and the URL with
+`--azure-endpoint`.
 
 ## One-image token test
 
@@ -35,10 +34,11 @@ python3 -m arc3d_benchmark.azure_image_test \
 Add `--save-response /tmp/arc3d-image-response.json` to retain the complete
 Azure JSON response. The script never runs evaluation or writes a benchmark result.
 
-The default output cap is 64 tokens. Override it when running:
+The default output cap is 20,000 tokens so reasoning has room to finish. Override
+it when running:
 
 ```sh
-python3 benchmark_main.py --task 1 --model YOUR-DEPLOYMENT-NAME --max-output-tokens 128
+python3 -m arc3d_benchmark.benchmark_main --task 1 --max-output-tokens 30000
 ```
 
 Use `--dry-run` to validate loading and prompt construction without calling the API.

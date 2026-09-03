@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import argparse
-import os
+import json
 from pathlib import Path
 
-from arc3d_benchmark.config import BenchmarkConfig
-from arc3d_benchmark.runner import run_benchmark
+from .config import (
+    DEFAULT_AZURE_DEPLOYMENT,
+    DEFAULT_AZURE_RESPONSES_URL,
+    DEFAULT_MAX_OUTPUT_TOKENS,
+    BenchmarkConfig,
+)
+from .runner import run_benchmark
 
 
 def parse_args() -> argparse.Namespace:
@@ -13,15 +18,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--task", type=int, choices=[1, 2, 3], required=True, help="Task number to evaluate.")
     parser.add_argument(
         "--model",
-        default=os.environ.get("AZURE_OPENAI_DEPLOYMENT", ""),
-        help="Azure OpenAI deployment name (defaults to AZURE_OPENAI_DEPLOYMENT).",
+        default=DEFAULT_AZURE_DEPLOYMENT,
+        help=f"Azure OpenAI deployment name (default: {DEFAULT_AZURE_DEPLOYMENT}).",
     )
     parser.add_argument(
         "--azure-endpoint",
-        default=os.environ.get("AZURE_OPENAI_ENDPOINT", ""),
-        help="Azure resource endpoint (defaults to AZURE_OPENAI_ENDPOINT).",
+        default=DEFAULT_AZURE_RESPONSES_URL,
+        help="Complete Azure Responses API URL.",
     )
-    parser.add_argument("--max-output-tokens", type=int, default=64, help="Maximum model output tokens.")
+    parser.add_argument(
+        "--max-output-tokens",
+        type=int,
+        default=DEFAULT_MAX_OUTPUT_TOKENS,
+        help=f"Maximum model output tokens (default: {DEFAULT_MAX_OUTPUT_TOKENS}).",
+    )
     parser.add_argument("--image-detail", choices=["low", "auto", "high"], default="auto")
     parser.add_argument("--view-policy", choices=["all", "neg-z-first"], default="all")
     parser.add_argument("--dry-run", action="store_true", help="Build the prompt without calling the model.")
@@ -31,7 +41,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    root = Path(__file__).resolve().parent
+    root = Path(__file__).resolve().parent.parent
     config = BenchmarkConfig(
         root=root,
         task_id=f"task{args.task}",
@@ -48,6 +58,17 @@ def main() -> None:
     correct = "skipped" if result["correct"] is None else str(result["correct"])
     print(f"task={result['task_id']} model={result['model']} correct={correct} accuracy={accuracy}")
     print(f"expected={result['expected']} predicted={result['predicted']}")
+    print("\nmodel_response:")
+    print(result["raw_output"] or "[No output text returned]")
+    usage = result.get("usage") or {}
+    print("\ntoken_usage:")
+    print(f"  input_tokens:  {usage.get('input_tokens', 'unavailable')}")
+    print(f"  output_tokens: {usage.get('output_tokens', 'unavailable')}")
+    print(f"  total_tokens:  {usage.get('total_tokens', 'unavailable')}")
+    if usage.get("input_tokens_details"):
+        print(f"  input_details: {json.dumps(usage['input_tokens_details'], ensure_ascii=False)}")
+    if usage.get("output_tokens_details"):
+        print(f"  output_details: {json.dumps(usage['output_tokens_details'], ensure_ascii=False)}")
     print(f"saved={result['result_path']}")
 
 
