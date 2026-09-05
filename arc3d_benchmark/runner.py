@@ -32,6 +32,7 @@ def run_benchmark(config: BenchmarkConfig) -> dict:
             config.model,
             messages,
             config.max_output_tokens,
+            config.reasoning_effort,
         )
         raw_text = output_text(raw_response)
         metrics = evaluate(raw_text, task.test.answer, config.candidate_labels)
@@ -41,6 +42,7 @@ def run_benchmark(config: BenchmarkConfig) -> dict:
         "created_at": datetime.now(timezone.utc).isoformat(),
         "task_id": config.task_id,
         "model": config.model,
+        "reasoning_effort": config.reasoning_effort,
         "max_output_tokens": config.max_output_tokens,
         "view_policy": config.view_policy,
         "image_detail": config.image_detail,

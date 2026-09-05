@@ -6,9 +6,11 @@ from pathlib import Path
 
 DEFAULT_AZURE_RESPONSES_URL = (
     "https://ch-interns-gpt4.openai.azure.com"
-    "/openai/responses?api-version=2025-04-01-preview"
+    "/openai/v1/responses"
+    # "/openai/responses?api-version=2025-04-01-preview"
 )
 DEFAULT_AZURE_DEPLOYMENT = "gpt-5.6-sol"
+DEFAULT_REASONING_EFFORT = "medium"
 DEFAULT_MAX_OUTPUT_TOKENS = 30_000
 
 
@@ -35,6 +37,7 @@ class BenchmarkConfig:
     root: Path
     task_id: str
     model: str = DEFAULT_AZURE_DEPLOYMENT
+    reasoning_effort: str = DEFAULT_REASONING_EFFORT
     azure_endpoint: str = DEFAULT_AZURE_RESPONSES_URL
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS
     image_detail: str = "auto"
