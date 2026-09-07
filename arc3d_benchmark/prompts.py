@@ -6,10 +6,20 @@ from .examples import example_content
 from .test_input import test_content
 
 
-SYSTEM_PROMPT = (
+EXAMPLE_SYSTEM_PROMPT = (
     "You are solving 3D visual reasoning puzzles. "
     "Use the two solved examples to infer the rule, then answer the test. "
     "First provide a concise explanation of the inferred rule, your approach, "
+    "and the key visual evidence supporting your choice. "
+    "For multi-select tasks, include every selected letter in the array. "
+    "End with a separate final line in this exact format: "
+    "FINAL_ANSWER: {\"answer\":[\"A\"]}."
+)
+
+NO_EXAMPLE_SYSTEM_PROMPT = (
+    "You are solving a 3D visual reasoning puzzle. "
+    "Infer the task and the correct answer from the puzzle. "
+    "First provide a concise explanation of your inferred task, your approach, "
     "and the key visual evidence supporting your choice. "
     "For multi-select tasks, include every selected letter in the array. "
     "End with a separate final line in this exact format: "
@@ -27,18 +37,32 @@ def view_order_text(config: BenchmarkConfig) -> str:
 
 
 def build_input(task: TaskCase, config: BenchmarkConfig) -> list[dict]:
+    has_examples = bool(task.examples)
     messages = [
         {
             "role": "system",
             "content": [
-                {"type": "input_text", "text": SYSTEM_PROMPT},
+                {
+                    "type": "input_text",
+                    "text": EXAMPLE_SYSTEM_PROMPT if has_examples else NO_EXAMPLE_SYSTEM_PROMPT,
+                },
                 {"type": "input_text", "text": view_order_text(config)},
             ],
         }
     ]
     for example in task.examples:
         messages.append({"role": "user", "content": example_content(example, config.image_detail)})
-    messages.append({"role": "user", "content": test_content(task.test, config.image_detail, config.view_policy)})
+    messages.append(
+        {
+            "role": "user",
+            "content": test_content(
+                task.test,
+                config.image_detail,
+                config.view_policy,
+                has_examples=has_examples,
+            ),
+        }
+    )
     messages.append(
         {
             "role": "user",

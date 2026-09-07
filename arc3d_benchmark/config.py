@@ -12,6 +12,9 @@ DEFAULT_AZURE_RESPONSES_URL = (
 DEFAULT_AZURE_DEPLOYMENT = "gpt-5.6-sol"
 DEFAULT_REASONING_EFFORT = "medium"
 DEFAULT_MAX_OUTPUT_TOKENS = 30_000
+DEFAULT_TEMPERATURE = None
+DEFAULT_TOP_P = None
+DEFAULT_EXAMPLES = ("example1", "example2")
 
 
 DEFAULT_VIEWS = [
@@ -40,11 +43,13 @@ class BenchmarkConfig:
     reasoning_effort: str = DEFAULT_REASONING_EFFORT
     azure_endpoint: str = DEFAULT_AZURE_RESPONSES_URL
     max_output_tokens: int = DEFAULT_MAX_OUTPUT_TOKENS
+    temperature: float | None = DEFAULT_TEMPERATURE
+    top_p: float | None = DEFAULT_TOP_P
     image_detail: str = "auto"
     view_policy: str = "all"
     output_dir: Path = Path("benchmark_results")
     image_root_name: str = "rendered_puzzle_images"
-    examples: tuple[str, ...] = ("example1", "example2")
+    examples: tuple[str, ...] = DEFAULT_EXAMPLES
     test_name: str = "test"
     candidate_labels: tuple[str, ...] = ("A", "B", "C", "D", "E")
     views: list[str] = field(default_factory=lambda: list(DEFAULT_VIEWS))

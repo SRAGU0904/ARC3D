@@ -40,7 +40,9 @@ def call_azure_openai(
     deployment: str,
     messages: list[dict],
     max_output_tokens: int,
-    reasoning_effort: str,
+    reasoning_effort: str = "medium",
+    temperature: float | None = None,
+    top_p: float | None = None,
 ) -> dict:
     api_key = os.environ.get("AZURE_OPENAI_API_KEY")
     if not api_key:
@@ -60,6 +62,14 @@ def call_azure_openai(
         "background": True,
         "store": True,
     }
+    if temperature is not None:
+        if not 0 <= temperature <= 2:
+            raise ValueError("temperature must be between 0 and 2")
+        payload["temperature"] = temperature
+    if top_p is not None:
+        if not 0 <= top_p <= 1:
+            raise ValueError("top_p must be between 0 and 1")
+        payload["top_p"] = top_p
     request = urllib.request.Request(
         url,
         data=json.dumps(payload).encode("utf-8"),

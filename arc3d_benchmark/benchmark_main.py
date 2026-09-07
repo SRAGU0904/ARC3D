@@ -7,6 +7,7 @@ from pathlib import Path
 from .config import (
     DEFAULT_AZURE_DEPLOYMENT,
     DEFAULT_AZURE_RESPONSES_URL,
+    DEFAULT_EXAMPLES,
     DEFAULT_MAX_OUTPUT_TOKENS,
     DEFAULT_REASONING_EFFORT,
     BenchmarkConfig,
@@ -39,8 +40,25 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_MAX_OUTPUT_TOKENS,
         help=f"Maximum model output tokens (default: {DEFAULT_MAX_OUTPUT_TOKENS}).",
     )
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=None,
+        help="Sampling temperature from 0 to 2. Omit to use the Azure deployment default.",
+    )
+    parser.add_argument(
+        "--top-p",
+        type=float,
+        default=None,
+        help="Nucleus sampling value from 0 to 1. Omit to use the Azure deployment default.",
+    )
     parser.add_argument("--image-detail", choices=["low", "auto", "high"], default="auto")
     parser.add_argument("--view-policy", choices=["all", "neg-z-first"], default="all")
+    parser.add_argument(
+        "--no-examples",
+        action="store_true",
+        help="Send only the held-out puzzle, without solved examples or their answers.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Build the prompt without calling the model.")
     parser.add_argument("--output-dir", default="benchmark_results", help="Directory for JSON results.")
     return parser.parse_args()
@@ -56,9 +74,12 @@ def main() -> None:
         reasoning_effort=args.reasoning_effort,
         azure_endpoint=args.azure_endpoint,
         max_output_tokens=args.max_output_tokens,
+        temperature=args.temperature,
+        top_p=args.top_p,
         image_detail=args.image_detail,
         view_policy=args.view_policy,
         output_dir=root / args.output_dir,
+        examples=() if args.no_examples else DEFAULT_EXAMPLES,
         dry_run=args.dry_run,
     )
     result = run_benchmark(config)
@@ -69,6 +90,13 @@ def main() -> None:
         f"effort={result['reasoning_effort']} correct={correct} accuracy={accuracy}"
     )
     print(f"expected={result['expected']} predicted={result['predicted']}")
+    print(
+        "sampling: "
+        f"requested_temperature={result['requested_temperature']} "
+        f"effective_temperature={result['effective_temperature']} "
+        f"requested_top_p={result['requested_top_p']} "
+        f"effective_top_p={result['effective_top_p']}"
+    )
     print("\nmodel_response:")
     print(result["raw_output"] or "[No output text returned]")
     usage = result.get("usage") or {}
