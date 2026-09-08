@@ -204,6 +204,9 @@ animate();
 document.querySelectorAll(".tab").forEach((button) => {
   button.addEventListener("click", () => {
     activePuzzle = button.dataset.puzzle;
+    const puzzleUrl = new URL(window.location.href);
+    puzzleUrl.searchParams.set("puzzle", activePuzzle);
+    window.history.replaceState(null, "", puzzleUrl);
     activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
     selectedLabels = new Set();
     testAnswerRevealed = false;

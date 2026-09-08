@@ -107,20 +107,22 @@ const puzzles = {
       { pos: [3, 5, 4], color: "#ff8a24"},
       { pos: [3, 4, 4], color: "#ff8a24"},
       { pos: [3, 4, 5], color: "#ff8a24"},
+      { pos: [2, 5, 5], color: "#ff8a24"},
       { pos: [4, 4, 5], color: "#ff8a24"},
       { pos: [5, 4, 5], color: "#4bb763"},
       { pos: [6, 4, 4], color: "#4bb763"},
+      { pos: [6, 4, 5], color: "#4bb763"},
       { pos: [6, 5, 4], color: "#4bb763"},
       { pos: [7, 5, 4], color: "#4bb763"},
       { pos: [7, 4, 4], color: "#4bb763"},
       { pos: [7, 3, 4], color: "#4bb763"},
     ],
-    missing: [6, 4, 5],
+    missing: [7, 5, 5],
     candidates: [
-      { label: "A", anchor: [6, 4, 4], face: "+z" },
-      { label: "B", anchor: [6, 5, 4], face: "+z" },
+      { label: "A", anchor: [7, 5, 4], face: "+z" },
+      { label: "B", anchor: [6, 4, 5], face: "+x" },
       { label: "C", anchor: [5, 4, 5], face: "+y" },
-      { label: "D", anchor: [7, 3, 4], face: "+z" },
+      { label: "D", anchor: [6, 5, 4], face: "+z" },
     ],
   }),
   test: makePuzzle({
@@ -194,6 +196,7 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
 renderCandidateButtons();
+setActiveButtons();
 render();
 resize();
 if (exportMode) frameExportCamera();
@@ -202,6 +205,9 @@ animate();
 document.querySelectorAll(".tab").forEach((button) => {
   button.addEventListener("click", () => {
     activePuzzle = button.dataset.puzzle;
+    const puzzleUrl = new URL(window.location.href);
+    puzzleUrl.searchParams.set("puzzle", activePuzzle);
+    window.history.replaceState(null, "", puzzleUrl);
     activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
     selectedLabel = null;
     testAnswerRevealed = false;

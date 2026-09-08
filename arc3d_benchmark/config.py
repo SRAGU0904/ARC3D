@@ -15,6 +15,7 @@ DEFAULT_MAX_OUTPUT_TOKENS = 30_000
 DEFAULT_TEMPERATURE = None
 DEFAULT_TOP_P = None
 DEFAULT_EXAMPLES = ("example1", "example2")
+DEFAULT_TEST = "test_v1"
 
 
 DEFAULT_VIEWS = [
@@ -50,7 +51,7 @@ class BenchmarkConfig:
     output_dir: Path = Path("benchmark_results")
     image_root_name: str = "rendered_puzzle_images"
     examples: tuple[str, ...] = DEFAULT_EXAMPLES
-    test_name: str = "test"
+    test_name: str = DEFAULT_TEST
     candidate_labels: tuple[str, ...] = ("A", "B", "C", "D", "E")
     views: list[str] = field(default_factory=lambda: list(DEFAULT_VIEWS))
     dry_run: bool = False

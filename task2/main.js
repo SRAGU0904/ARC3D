@@ -118,25 +118,27 @@ const puzzles = {
   }),
   test: makePuzzle({
     voxels: [
-      [2, 2, 2], [2, 3, 2], [2, 4, 2], [2, 5, 2],
-      [2, 2, 3], [2, 3, 3], [2, 4, 3], [2, 5, 3],
-      [3, 2, 2], [3, 3, 2], [3, 4, 2], 
-      [3, 2, 3], [3, 3, 3], [3, 4, 3],
-      [4, 2, 2], [4, 3, 2], [4, 4, 2],
-      [4, 2, 3], [4, 3, 3], [4, 4, 3],
-      [3, 5, 4],
-      [4, 3, 3], [4, 4, 3], [4, 5, 4],
-      [5, 3, 4], [5, 3, 5],
-      [5, 4, 4], [5, 5, 4],
-      [6, 4, 4], [6, 5, 4],
-      [2, 2, 4], [2, 2, 5], [2, 2, 6],
+      [2, 2, 1], [2, 3, 1], [3, 4, 1],[2, 2, 6],
+      [2, 2, 2], [2, 3, 2], [3, 4, 2],
+      [3, 2, 1], [3, 3, 1], 
+      [3, 2, 2], [3, 3, 2], [3, 2, 6],
+      [4, 2, 1], [4, 3, 1], 
+      [4, 2, 2], [4, 3, 2], 
+      [3, 4, 3], [2, 5, 3],
+      [4, 3, 2], [4, 4, 3],
+      [5, 3, 3], [5, 3, 4],
+      [5, 4, 3],
+      [6, 4, 3],[6, 3, 4],
+      [2, 2, 3], [2, 2, 4], [2, 2, 5], [3, 5, 3],[3, 5, 2],
     ],
-    blue: [4, 5, 6],
+    // for the test_v1, it's:
+    blue: [2, 5, 5],
+    // blue: [4, 5, 6],
     candidates: [
-      { label: "A", voxel: [3, 5, 4] },
-      { label: "B", voxel: [6, 5, 4] },
-      { label: "C", voxel: [5, 3, 5] },
-      { label: "D", voxel: [2, 2, 6] },
+      { label: "A", voxel: [3, 5, 2] },
+      { label: "B", voxel: [5, 4, 3] },
+      { label: "C", voxel: [6, 3, 4] },
+      { label: "D", voxel: [3, 2, 6] },
     ],
   }),
 };
@@ -192,6 +194,9 @@ animate();
 document.querySelectorAll(".tab").forEach((button) => {
   button.addEventListener("click", () => {
     activePuzzle = button.dataset.puzzle;
+    const puzzleUrl = new URL(window.location.href);
+    puzzleUrl.searchParams.set("puzzle", activePuzzle);
+    window.history.replaceState(null, "", puzzleUrl);
     activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
     selectedLabel = null;
     testAnswerRevealed = false;
