@@ -1,6 +1,4 @@
-const scope = window.location.pathname.endsWith("/")
-  ? window.location.pathname
-  : window.location.pathname.slice(0, window.location.pathname.lastIndexOf("/") + 1);
+const scope = window.location.pathname;
 const versionEndpoint = `/__arc3d_version?scope=${encodeURIComponent(scope)}`;
 
 let loadedVersion = null;

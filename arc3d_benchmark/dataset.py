@@ -22,9 +22,18 @@ class TaskCase:
 
 
 def load_task(config: BenchmarkConfig) -> TaskCase:
-    task_dir = config.image_root / config.task_id
-    if not task_dir.exists():
-        raise FileNotFoundError(f"Missing task image directory: {task_dir}")
+    task_root = config.image_root / config.task_id
+    if not task_root.exists():
+        raise FileNotFoundError(f"Missing task image directory: {task_root}")
+
+    variant_dir = task_root / config.variant_id
+    if variant_dir.exists():
+        task_dir = variant_dir
+    elif config.variant_id == "base":
+        # Backward compatibility for the original task/case directory layout.
+        task_dir = task_root
+    else:
+        raise FileNotFoundError(f"Missing variant image directory: {variant_dir}")
 
     examples = [load_puzzle(task_dir, name, config, include_answer=True) for name in config.examples]
     test = load_puzzle(task_dir, config.test_name, config, include_answer=True)

@@ -41,6 +41,35 @@ button {
   cursor: pointer;
 }
 
+.label-seed-control {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+  color: #303733;
+  font-size: 12px;
+  font-weight: 730;
+}
+
+.label-seed-control input {
+  width: 82px;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid rgba(23, 25, 24, 0.2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.label-seed-control button {
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  color: white;
+  background: #1f2522;
+  font-weight: 760;
+}
+
 .app {
   height: 100vh;
   min-height: 0;

@@ -15,7 +15,8 @@ DEFAULT_MAX_OUTPUT_TOKENS = 30_000
 DEFAULT_TEMPERATURE = None
 DEFAULT_TOP_P = None
 DEFAULT_EXAMPLES = ("example1", "example2")
-DEFAULT_TEST = "test_v1"
+DEFAULT_TEST = "test"
+DEFAULT_VARIANT = "base"
 
 
 DEFAULT_VIEWS = [
@@ -40,6 +41,7 @@ DEFAULT_VIEWS = [
 class BenchmarkConfig:
     root: Path
     task_id: str
+    variant_id: str = DEFAULT_VARIANT
     model: str = DEFAULT_AZURE_DEPLOYMENT
     reasoning_effort: str = DEFAULT_REASONING_EFFORT
     azure_endpoint: str = DEFAULT_AZURE_RESPONSES_URL

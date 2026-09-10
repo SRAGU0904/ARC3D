@@ -20,3 +20,14 @@ buttons.forEach((button) => {
 
 const initialTask = document.querySelector(".task-link.is-active");
 if (initialTask) loadTask(initialTask.dataset.src);
+
+window.addEventListener("message", (event) => {
+  if (event.origin !== window.location.origin || event.data?.type !== "arc3d:open-case") return;
+
+  const { taskId, variantId, caseId, seed } = event.data;
+  if (!["task1", "task2", "task3"].includes(taskId)) return;
+
+  const query = new URLSearchParams({ variant: variantId, puzzle: caseId });
+  if (seed !== null && seed !== undefined) query.set("seed", seed);
+  loadTask(`./${taskId}/?${query}`);
+});

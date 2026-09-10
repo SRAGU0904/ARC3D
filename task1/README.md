@@ -34,7 +34,8 @@ state where the user or model selects labeled candidate positions such as `A`,
 target repaired object.
 
 To make a puzzle easier or harder, edit `missingVoxels` and `candidates` in
-`main.js`. Each missing voxel is one visible surface block removed from the
+`../tasks/task1/variants/base.js`, or create and register another variant. Each
+missing voxel is one visible surface block removed from the
 completed cuboid:
 
 ```js

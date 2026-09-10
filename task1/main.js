@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+import { taskDefinition } from "../tasks/task1/index.js";
+import { materializeVariant, normalizeSeed, setupLabelSeedControl } from "../tasks/label-permutation.js";
 
 const COLORS = {
   observed: "#ff8a24",
@@ -62,10 +64,18 @@ const exportParams = new URLSearchParams(window.location.search);
 const exportMode = exportParams.get("export") === "fixed";
 const requestedPuzzle = exportParams.get("puzzle");
 const requestedView = exportParams.get("view");
+const requestedVariant = exportParams.get("variant");
+const labelSeed = normalizeSeed(exportParams.get("seed"));
+const activeVariantId = Object.hasOwn(taskDefinition.variants, requestedVariant)
+  ? requestedVariant
+  : taskDefinition.defaultVariant;
+const activeVariant = taskDefinition.variants[activeVariantId];
+const activeCases = materializeVariant(activeVariant, labelSeed);
 if (exportMode) document.documentElement.classList.add("is-exporting-fixed");
+setupLabelSeedControl({ activeVariantId, exportMode, seed: labelSeed });
 
-let activePuzzle = ["example1", "example2", "test"].includes(requestedPuzzle) ? requestedPuzzle : "example1";
-let activeMode = "input";
+let activePuzzle = Object.hasOwn(activeCases, requestedPuzzle) ? requestedPuzzle : "example1";
+let activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
 let selectedLabels = new Set();
 let testAnswerRevealed = false;
 let currentViewId = FIXED_VIEWS[requestedView] ? requestedView : INITIAL_VIEW_ID;
@@ -76,79 +86,14 @@ let cameraTarget = INITIAL_CAMERA_TARGET.clone();
 let lastHorizontalDirection = 1;
 let viewMode = "fixed";
 
-const puzzles = {
-  example1: makePuzzle({
-    blocks: [
-      {
-        min: [2, 1, 1],
-        max: [5, 4, 4],
-        missingVoxels: [
-          [5, 1, 4],
-          [3, 4, 4],
-        ],
-      },
-      {
-        min: [7, 2, 2],
-        max: [9, 5, 5],
-        missingVoxels: [[7, 5, 5]],
-      },
-    ],
-    candidates: [
-      { label: "A", anchor: [5, 1, 3], face: "+z" },
-      { label: "B", anchor: [4, 3, 4], face: "+z" },
-      { label: "C", anchor: [3, 4, 3], face: "+z" },
-      { label: "D", anchor: [7, 5, 4], face: "+z" },
-      { label: "E", anchor: [9, 5, 5], face: "+y" },
-    ],
-  }),
-  example2: makePuzzle({
-    blocks: [
-      {
-        min: [1, 2, 2],
-        max: [4, 5, 5],
-        missingVoxels: [[4, 4, 5]],
-      },
-      {
-        min: [6, 3, 3],
-        max: [8, 6, 6],
-        missingVoxels: [
-          [7, 4, 6],
-          [8, 5, 5],
-        ],
-      },
-    ],
-    candidates: [
-      { label: "A", anchor: [1, 4, 3], face: "-x" },
-      { label: "B", anchor: [4, 4, 4], face: "+z" },
-      { label: "C", anchor: [7, 4, 5], face: "+z" },
-      { label: "D", anchor: [7, 5, 5], face: "+x" },
-      { label: "E", anchor: [7, 6, 6], face: "+y" },
-    ],
-  }),
-  test: makePuzzle({
-    blocks: [
-      {
-        min: [1, 2, 2],
-        max: [4, 5, 5],
-        missingVoxels: [
-          [1, 3, 5],
-          [4, 5, 5],
-        ],
-      },
-      {
-        min: [6, 1, 4],
-        max: [7, 4, 7],
-        missingVoxels: [[7, 2, 5]],
-      },
-    ],
-    candidates: [
-      { label: "A", anchor: [7, 4, 7], face: "+y" },
-      { label: "B", anchor: [4, 4, 3], face: "+x" },
-      { label: "C", anchor: [4, 5, 4], face: "+z" },
-      { label: "D", anchor: [6, 2, 5], face: "+x" },
-      { label: "E", anchor: [1, 3, 4], face: "+z" },
-    ],
-  }),
+const puzzles = Object.fromEntries(
+  Object.entries(activeCases).map(([caseId, definition]) => [caseId, makePuzzle(definition)]),
+);
+
+window.ARC3D_PUZZLE_METADATA = {
+  taskId: taskDefinition.id,
+  variantId: activeVariantId,
+  seed: activeVariantId === "label-permutation" ? labelSeed : null,
 };
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -194,6 +139,7 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
 renderCandidateButtons();
+setActiveButtons();
 render();
 resize();
 if (exportMode) {
@@ -455,7 +401,8 @@ function setStatus() {
     output: activePuzzle === "test" ? "answer" : "output",
     workspace: "workspace",
   };
-  statusLine.textContent = `${names[activePuzzle]} ${names[activeMode]}`;
+  const permutation = activeVariantId === "label-permutation" ? ` | seed ${labelSeed}` : "";
+  statusLine.textContent = `${names[activePuzzle]} ${names[activeMode]}${permutation}`;
   testTools.hidden = !(activePuzzle === "test" && activeMode === "workspace");
 }
 

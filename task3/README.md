@@ -14,7 +14,8 @@ Expected answer format:
 {"choice":"A"}
 ```
 
-Edit `puzzles.example` or `puzzles.test` in `main.js` to move the labels:
+Edit the relevant case in `../tasks/task3/variants/base.js`, or create and
+register another variant, to move the labels:
 
 ```js
 { label: "A", anchor: [2, 4, 3], face: "+z" }
@@ -22,3 +23,21 @@ Edit `puzzles.example` or `puzzles.test` in `main.js` to move the labels:
 
 `anchor` is the existing cube that carries the label. `face` is the face where
 the label is attached and where the green repair cube will be added.
+
+## Variants
+
+- `base` preserves the original Example 2 from the red side of the historical
+  diff.
+- `junction-bias-control` contains the revised Example 2 from the green side.
+  It moves the correct repair away from the original junction pattern so the
+  examples do not consistently reward a junction-position shortcut. Example 1
+  and the held-out Test are unchanged.
+
+Open the control variant directly with:
+
+```text
+http://localhost:4181/task3/?variant=junction-bias-control&puzzle=example2
+```
+
+Its benchmark images live under
+`rendered_puzzle_images/task3/junction-bias-control/`.

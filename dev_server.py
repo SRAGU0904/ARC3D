@@ -12,6 +12,11 @@ class NoCacheRequestHandler(SimpleHTTPRequestHandler):
 
     project_root: Path
 
+    def log_request(self, code: int | str = "-", size: int | str = "-") -> None:
+        if urlsplit(self.path).path == "/__arc3d_version":
+            return
+        super().log_request(code, size)
+
     def do_GET(self) -> None:
         request_url = urlsplit(self.path)
         if request_url.path == "/__arc3d_version":
@@ -31,14 +36,28 @@ class NoCacheRequestHandler(SimpleHTTPRequestHandler):
             requested.relative_to(self.project_root)
         except ValueError:
             requested = self.project_root
-        if not requested.is_dir():
+
+        requested_page = requested.name if requested.is_file() else None
+        if requested.is_file():
+            requested = requested.parent
+        elif not requested.is_dir():
             requested = self.project_root
 
-        files = [
-            path
-            for path in requested.iterdir()
-            if path.is_file() and path.suffix in {".html", ".js", ".css"}
-        ]
+        scan_roots = [requested]
+        structured_task = self.project_root / "tasks" / requested.name
+        if structured_task.is_dir():
+            scan_roots.append(structured_task)
+        elif requested == self.project_root and requested_page == "documentation.html":
+            scan_roots.append(self.project_root / "tasks")
+
+        files = []
+        for scan_root in scan_roots:
+            candidates = scan_root.rglob("*") if scan_root != self.project_root else scan_root.iterdir()
+            files.extend(
+                path
+                for path in candidates
+                if path.is_file() and path.suffix in {".html", ".js", ".css"}
+            )
         timestamps = []
         for path in files:
             try:
@@ -67,7 +86,7 @@ def main() -> None:
     project_root = Path(__file__).resolve().parent
     NoCacheRequestHandler.project_root = project_root
     handler = partial(NoCacheRequestHandler, directory=str(project_root))
-    server = ThreadingHTTPServer(("", args.port), handler)
+    server = ThreadingHTTPServer(("127.0.0.1", args.port), handler)
 
     print(f"Serving ARC3D at http://localhost:{args.port}/")
     print("Browser caching is disabled and saved web files reload automatically.")

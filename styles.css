@@ -68,7 +68,7 @@ iframe {
 @media (max-width: 560px) {
   .task-nav {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .task-link {

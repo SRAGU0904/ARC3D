@@ -1,4 +1,8 @@
 {
+  "schemaVersion": 2,
+  "defaultVariant": "base",
+  "directoryPattern": "task-id/variant-id/case-id/view-id.png",
+  "legacyBasePattern": "task-id/case-id/view-id.png",
   "generatedAt": "2026-09-01T13:39:52.956Z",
   "imageSize": [
     1024,
@@ -25,6 +29,11 @@
     "task2",
     "task3"
   ],
+  "variants": {
+    "task1": ["base"],
+    "task2": ["base", "reduced-face-adjacency"],
+    "task3": ["base", "junction-bias-control"]
+  },
   "puzzles": [
     "example1",
     "example2",

@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { TrackballControls } from "three/addons/controls/TrackballControls.js";
+import { taskDefinition } from "../tasks/task3/index.js";
+import { materializeVariant, normalizeSeed, setupLabelSeedControl } from "../tasks/label-permutation.js";
 
 const COLORS = {
   body: "#ff8a24",
@@ -62,10 +64,18 @@ const exportParams = new URLSearchParams(window.location.search);
 const exportMode = exportParams.get("export") === "fixed";
 const requestedPuzzle = exportParams.get("puzzle");
 const requestedView = exportParams.get("view");
+const requestedVariant = exportParams.get("variant");
+const labelSeed = normalizeSeed(exportParams.get("seed"));
+const activeVariantId = Object.hasOwn(taskDefinition.variants, requestedVariant)
+  ? requestedVariant
+  : taskDefinition.defaultVariant;
+const activeVariant = taskDefinition.variants[activeVariantId];
+const activeCases = materializeVariant(activeVariant, labelSeed);
 if (exportMode) document.documentElement.classList.add("is-exporting-fixed");
+setupLabelSeedControl({ activeVariantId, exportMode, seed: labelSeed });
 
-let activePuzzle = ["example1", "example2", "test"].includes(requestedPuzzle) ? requestedPuzzle : "example1";
-let activeMode = "input";
+let activePuzzle = Object.hasOwn(activeCases, requestedPuzzle) ? requestedPuzzle : "example1";
+let activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
 let selectedLabel = null;
 let testAnswerRevealed = false;
 let currentViewId = FIXED_VIEWS[requestedView] ? requestedView : INITIAL_VIEW_ID;
@@ -76,81 +86,14 @@ let cameraTarget = INITIAL_CAMERA_TARGET.clone();
 let lastHorizontalDirection = 1;
 let viewMode = "fixed";
 
-const puzzles = {
-    example1: makePuzzle({
-    voxels: [
-      { pos: [1, 4, 4], color: "#ff8a24" },
-      { pos: [2, 4, 4], color: "#ff8a24" },
-      { pos: [2, 3, 5], color: "#ff8a24" },
-      { pos: [2, 4, 5], color: "#ff8a24" },
-      { pos: [3, 4, 5], color: "#ff8a24" },
-      { pos: [3, 4, 4], color: "#ff8a24" },
-      { pos: [5, 4, 5], color: "#4bb763" },
-      { pos: [6, 4, 5], color: "#4bb763" },
-      { pos: [6, 3, 5], color: "#4bb763" },
-      { pos: [6, 4, 4], color: "#4bb763" },
-      { pos: [7, 4, 4], color: "#4bb763" },
-    ],
-    missing: [5, 4, 4],
-    candidates: [
-      { label: "A", anchor: [6, 4, 5], face: "+y" },
-      { label: "B", anchor: [5, 4, 5], face: "-z" },
-      { label: "C", anchor: [6, 3, 5], face: "-x" },
-      { label: "D", anchor: [6, 3, 5], face: "-z" },
-    ],
-  }),
-  example2: makePuzzle({
-    voxels: [
-      { pos: [2, 3, 4], color: "#ff8a24"},
-      { pos: [2, 4, 4], color: "#ff8a24"},
-      { pos: [2, 5, 4], color: "#ff8a24"},
-      { pos: [3, 5, 4], color: "#ff8a24"},
-      { pos: [3, 4, 4], color: "#ff8a24"},
-      { pos: [3, 4, 5], color: "#ff8a24"},
-      { pos: [2, 5, 5], color: "#ff8a24"},
-      { pos: [4, 4, 5], color: "#ff8a24"},
-      { pos: [5, 4, 5], color: "#4bb763"},
-      { pos: [6, 4, 4], color: "#4bb763"},
-      { pos: [6, 4, 5], color: "#4bb763"},
-      { pos: [6, 5, 4], color: "#4bb763"},
-      { pos: [7, 5, 4], color: "#4bb763"},
-      { pos: [7, 4, 4], color: "#4bb763"},
-      { pos: [7, 3, 4], color: "#4bb763"},
-    ],
-    missing: [7, 5, 5],
-    candidates: [
-      { label: "A", anchor: [7, 5, 4], face: "+z" },
-      { label: "B", anchor: [6, 4, 5], face: "+x" },
-      { label: "C", anchor: [5, 4, 5], face: "+y" },
-      { label: "D", anchor: [6, 5, 4], face: "+z" },
-    ],
-  }),
-  test: makePuzzle({
-    voxels: [
-      { pos: [2, 4, 4], color: "#ff8a24"},
-      { pos: [2, 4, 3], color: "#ff8a24"},
-      { pos: [2, 3, 3], color: "#ff8a24"},
-      { pos: [2, 3, 4], color: "#ff8a24"},
-      { pos: [3, 3, 3], color: "#ff8a24"},
-      { pos: [3, 4, 3], color: "#ff8a24"},
-      { pos: [3, 5, 3], color: "#ff8a24"},
-      { pos: [4, 4, 3], color: "#ff8a24"},
-      { pos: [5, 4, 3], color: "#4bb763"},
-      { pos: [6, 5, 3], color: "#4bb763"},
-      { pos: [6, 4, 3], color: "#4bb763"},
-      { pos: [6, 3, 3], color: "#4bb763"},
-      { pos: [7, 3, 3], color: "#4bb763"},
-      { pos: [7, 4, 3], color: "#4bb763"},
-      { pos: [7, 4, 4], color: "#4bb763"},
-    ],
-    missing: [7, 3, 4],
-    candidates: [
-      { label: "A", anchor: [6, 4, 3], face: "+z" },
-      { label: "B", anchor: [7, 4, 3], face: "+y" },
-      { label: "C", anchor: [7, 4, 4], face: "+x" },
-      { label: "D", anchor: [7, 3, 3], face: "+z" },
-    ],
-  }),
+const puzzles = Object.fromEntries(
+  Object.entries(activeCases).map(([caseId, definition]) => [caseId, makePuzzle(definition)]),
+);
+
+window.ARC3D_PUZZLE_METADATA = {
+  taskId: taskDefinition.id,
+  variantId: activeVariantId,
+  seed: activeVariantId === "label-permutation" ? labelSeed : null,
 };
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -441,7 +384,8 @@ function setStatus() {
     output: activePuzzle === "test" ? "answer" : "output",
     workspace: "workspace",
   };
-  statusLine.textContent = `${names[activePuzzle]} ${names[activeMode]}`;
+  const permutation = activeVariantId === "label-permutation" ? ` | seed ${labelSeed}` : "";
+  statusLine.textContent = `${names[activePuzzle]} ${names[activeMode]}${permutation}`;
   testTools.hidden = !(activePuzzle === "test" && activeMode === "workspace");
 }
 

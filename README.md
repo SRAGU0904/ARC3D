@@ -1,5 +1,56 @@
 # ARC-3D Demo: task 543a7ed5
 
+## Current project structure
+
+The website is now data-driven while keeping the original task-page layout.
+
+- `tasks/catalog.js` is the central task catalog used by the documentation page.
+- `tasks/taskN/index.js` contains task-level metadata and registers its variants.
+- `tasks/taskN/variants/*.js` contains the actual example and test puzzle data.
+- `taskN/main.js` is the task-specific renderer and should not contain puzzle coordinates.
+- `documentation.html` presents every registered task, variant, and case.
+
+Open the project with the no-cache, auto-reload development server:
+
+```sh
+python3 dev_server.py --port 4181
+```
+
+Then visit `http://localhost:4181/`. Saving web source files reloads the relevant
+page automatically.
+
+### Adding a variant
+
+Copy the relevant task's `variants/base.js`, give the exported variant a stable
+ID, then import and register it in that task's `index.js`. A variant owns its
+example/test case data and becomes visible on the generated Documentation page.
+
+Rendered benchmark images for new variants should use:
+
+```text
+rendered_puzzle_images/taskN/variant-id/case-id/view-id.png
+```
+
+The original flat `taskN/case-id` image folders remain supported as the `base`
+variant for backward compatibility.
+
+### Seeded label-permutation variant
+
+Every task registers a `label-permutation` robustness variant. It keeps the
+base geometry fixed and deterministically reassigns candidate labels. Each
+case derives a separate permutation from the task id, case id, and shared seed.
+
+Open it from Documentation, then enter a seed in the top-right control, or use
+a direct URL:
+
+```text
+http://localhost:4181/task2/?variant=label-permutation&puzzle=test&seed=42
+```
+
+The same seed always reproduces the same labels. Changing the seed generates a
+different set of case-specific permutations. Correct answers are recomputed
+from geometry after permutation; the original base data is never mutated.
+
 This folder contains a local webpage demo that extends the ARC-AGI-1 training
 task `543a7ed5` into a 3D voxel repair concept with one example and one test
 puzzle.

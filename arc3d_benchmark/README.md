@@ -7,6 +7,20 @@ export AZURE_OPENAI_API_KEY="..."
 python3 -m arc3d_benchmark.benchmark_main --task 1
 ```
 
+Select a structured variant and explicit cases without editing `config.py`:
+
+```sh
+python3 -m arc3d_benchmark.benchmark_main \
+  --task 2 \
+  --variant base \
+  --examples example1 example2 \
+  --test test_v1
+```
+
+Use `--no-examples` with `--test` to run a held-out case by itself. New variant
+images belong under `rendered_puzzle_images/taskN/variant-id/case-id/`. The
+original flat task folders continue to work when `--variant base` is selected.
+
 The Azure Responses URL and the `gpt-5.6-sol` deployment are configured in
 `arc3d_benchmark/config.py`. Only the API key is read from the environment.
 You can still override the deployment with `--model` and the URL with

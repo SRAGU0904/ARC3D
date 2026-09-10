@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARC-3D Documentation</title>
+    <link rel="stylesheet" href="./documentation.css" />
+  </head>
+  <body>
+    <main class="docs-shell">
+      <header class="docs-header">
+        <p class="eyebrow">ARC-3D catalog</p>
+        <h1>Task documentation</h1>
+        <p class="intro">Select a task to inspect its reasoning rule, variants, examples, and tests.</p>
+      </header>
+
+      <div class="docs-layout">
+        <aside class="task-sidebar" aria-label="Task index">
+          <div class="sidebar-heading">
+            <span>Task index</span>
+            <strong id="task-count"></strong>
+          </div>
+          <nav id="task-index" class="task-index"></nav>
+          <p class="hierarchy-note">
+            <span>Task</span><b>→</b><span>Variant</span><b>→</b><span>Case</span>
+          </p>
+        </aside>
+
+        <section id="task-detail" class="task-detail" aria-live="polite"></section>
+      </div>
+    </main>
+
+    <script type="module" src="./documentation.js"></script>
+    <script src="./live_reload.js"></script>
+  </body>
+</html>

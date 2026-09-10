@@ -43,6 +43,7 @@ def run_benchmark(config: BenchmarkConfig) -> dict:
     result = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "task_id": config.task_id,
+        "variant_id": config.variant_id,
         "model": config.model,
         "reasoning_effort": config.reasoning_effort,
         "max_output_tokens": config.max_output_tokens,
@@ -61,7 +62,9 @@ def run_benchmark(config: BenchmarkConfig) -> dict:
     }
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
-    result_path = config.output_dir / f"{config.task_id}_{config.model}_{timestamp_slug()}.json"
+    result_path = config.output_dir / (
+        f"{config.task_id}_{config.variant_id}_{config.model}_{timestamp_slug()}.json"
+    )
     result["result_path"] = str(result_path)
     result_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
     return result

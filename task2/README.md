@@ -16,7 +16,7 @@ a JSON action:
 {"choice":"B"}
 ```
 
-Object shape is defined manually in `main.js`:
+Object shape is defined in `../tasks/task2/variants/base.js`:
 
 ```js
 voxels: [
@@ -34,3 +34,20 @@ blue: [8, 4, 5]
 
 Candidate positions are defined under `candidates`. The closest candidate to
 the blue cube is computed automatically.
+
+## Variants
+
+- `base` preserves the original test from the red side of the historical diff.
+- `reduced-face-adjacency` contains the revised test from the green side. It
+  reduces broad face-adjacent voxel connections and relocates the blue cube and
+  candidate positions while reusing the same two solved examples.
+
+Puzzle data lives in `../tasks/task2/variants/`. The revised variant can be
+opened directly with:
+
+```text
+http://localhost:4181/task2/?variant=reduced-face-adjacency&puzzle=test
+```
+
+Its benchmark images live under
+`rendered_puzzle_images/task2/reduced-face-adjacency/`.

@@ -10,6 +10,8 @@ from .config import (
     DEFAULT_EXAMPLES,
     DEFAULT_MAX_OUTPUT_TOKENS,
     DEFAULT_REASONING_EFFORT,
+    DEFAULT_TEST,
+    DEFAULT_VARIANT,
     BenchmarkConfig,
 )
 from .runner import run_benchmark
@@ -18,6 +20,22 @@ from .runner import run_benchmark
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run ARC3D image-choice benchmark.")
     parser.add_argument("--task", type=int, choices=[1, 2, 3], required=True, help="Task number to evaluate.")
+    parser.add_argument(
+        "--variant",
+        default=DEFAULT_VARIANT,
+        help=f"Variant image folder within the task (default: {DEFAULT_VARIANT}).",
+    )
+    parser.add_argument(
+        "--examples",
+        nargs="+",
+        help="Solved case folder names. Omit to use the configured defaults.",
+    )
+    parser.add_argument(
+        "--test",
+        dest="test_name",
+        default=DEFAULT_TEST,
+        help=f"Held-out case folder name (default: {DEFAULT_TEST}).",
+    )
     parser.add_argument(
         "--model",
         default=DEFAULT_AZURE_DEPLOYMENT,
@@ -70,6 +88,7 @@ def main() -> None:
     config = BenchmarkConfig(
         root=root,
         task_id=f"task{args.task}",
+        variant_id=args.variant,
         model=args.model,
         reasoning_effort=args.reasoning_effort,
         azure_endpoint=args.azure_endpoint,
@@ -79,14 +98,15 @@ def main() -> None:
         image_detail=args.image_detail,
         view_policy=args.view_policy,
         output_dir=root / args.output_dir,
-        examples=() if args.no_examples else DEFAULT_EXAMPLES,
+        examples=() if args.no_examples else tuple(args.examples or DEFAULT_EXAMPLES),
+        test_name=args.test_name,
         dry_run=args.dry_run,
     )
     result = run_benchmark(config)
     accuracy = "skipped" if result["accuracy"] is None else f"{result['accuracy']:.3f}"
     correct = "skipped" if result["correct"] is None else str(result["correct"])
     print(
-        f"task={result['task_id']} model={result['model']} "
+        f"task={result['task_id']} variant={result['variant_id']} model={result['model']} "
         f"effort={result['reasoning_effort']} correct={correct} accuracy={accuracy}"
     )
     print(f"expected={result['expected']} predicted={result['predicted']}")
