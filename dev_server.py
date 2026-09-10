@@ -45,7 +45,7 @@ class NoCacheRequestHandler(SimpleHTTPRequestHandler):
 
         scan_roots = [requested]
         structured_task = self.project_root / "tasks" / requested.name
-        if structured_task.is_dir():
+        if structured_task.is_dir() and structured_task != requested:
             scan_roots.append(structured_task)
         elif requested == self.project_root and requested_page == "documentation.html":
             scan_roots.append(self.project_root / "tasks")

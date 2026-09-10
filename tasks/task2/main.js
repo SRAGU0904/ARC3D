@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import { TrackballControls } from "three/addons/controls/TrackballControls.js";
-import { taskDefinition } from "../tasks/task1/index.js";
-import { materializeVariant, normalizeSeed, setupLabelSeedControl } from "../tasks/label-permutation.js";
+import { taskDefinition } from "./index.js";
+import { materializeVariant, normalizeSeed, setupLabelSeedControl } from "../label-permutation.js";
 
 const COLORS = {
-  observed: "#ff8a24",
-  repair: "#4bb763",
+  body: "#ff8a24",
+  closest: "#4bb763",
+  blue: "#2f72c4",
   label: "#ffffff",
   labelText: "#171918",
   edge: "#050505",
@@ -15,7 +16,7 @@ const VOXEL_SIZE = 1;
 const GRID_SIZE = 10;
 const HALF = (GRID_SIZE - 1) / 2;
 const INITIAL_CAMERA_TARGET = new THREE.Vector3(0, 0, 0);
-const CAMERA_DISTANCE = 17;
+const CAMERA_DISTANCE = 14.3;
 const INITIAL_VIEW_ID = "corner-nx-py-pz";
 const FIXED_VIEWS = {
   "face-px": { label: "x+ y0 z0", dir: [1, 0, 0], text: "+X" },
@@ -44,14 +45,14 @@ const HORIZONTAL_RING = [
   [-1, 0],
   [-1, 1],
 ];
-const FACE_NORMALS = {
-  "+x": new THREE.Vector3(1, 0, 0),
-  "-x": new THREE.Vector3(-1, 0, 0),
-  "+y": new THREE.Vector3(0, 1, 0),
-  "-y": new THREE.Vector3(0, -1, 0),
-  "+z": new THREE.Vector3(0, 0, 1),
-  "-z": new THREE.Vector3(0, 0, -1),
-};
+const FACE_DIRECTIONS = [
+  { normal: new THREE.Vector3(1, 0, 0) },
+  { normal: new THREE.Vector3(-1, 0, 0) },
+  { normal: new THREE.Vector3(0, 1, 0) },
+  { normal: new THREE.Vector3(0, -1, 0) },
+  { normal: new THREE.Vector3(0, 0, 1) },
+  { normal: new THREE.Vector3(0, 0, -1) },
+];
 
 const sceneEl = document.querySelector("#scene");
 const statusLine = document.querySelector("#status-line");
@@ -76,7 +77,7 @@ setupLabelSeedControl({ activeVariantId, exportMode, seed: labelSeed });
 
 let activePuzzle = Object.hasOwn(activeCases, requestedPuzzle) ? requestedPuzzle : "example1";
 let activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
-let selectedLabels = new Set();
+let selectedLabel = null;
 let testAnswerRevealed = false;
 let currentViewId = FIXED_VIEWS[requestedView] ? requestedView : INITIAL_VIEW_ID;
 let currentSideViewId = "face-pz";
@@ -142,9 +143,7 @@ renderCandidateButtons();
 setActiveButtons();
 render();
 resize();
-if (exportMode) {
-  frameExportCamera();
-}
+if (exportMode) frameExportCamera();
 animate();
 
 document.querySelectorAll(".tab").forEach((button) => {
@@ -154,7 +153,7 @@ document.querySelectorAll(".tab").forEach((button) => {
     puzzleUrl.searchParams.set("puzzle", activePuzzle);
     window.history.replaceState(null, "", puzzleUrl);
     activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
-    selectedLabels = new Set();
+    selectedLabel = null;
     testAnswerRevealed = false;
     renderCandidateButtons();
     setActiveButtons();
@@ -177,15 +176,11 @@ document.querySelectorAll(".mode").forEach((button) => {
 });
 
 document.querySelector("#check-answer").addEventListener("click", () => {
-  const expected = puzzles.test.answerLabels;
-  const correct =
-    expected.size === selectedLabels.size &&
-    [...expected].every((label) => selectedLabels.has(label));
-  statusLine.textContent = correct ? "Test correct" : "Test incomplete";
+  statusLine.textContent = selectedLabel === puzzles.test.answer ? "Test correct" : "Test incomplete";
 });
 
 document.querySelector("#reset-answer").addEventListener("click", () => {
-  selectedLabels = new Set();
+  selectedLabel = null;
   testAnswerRevealed = false;
   activeMode = "workspace";
   renderCandidateButtons();
@@ -195,7 +190,7 @@ document.querySelector("#reset-answer").addEventListener("click", () => {
 
 document.querySelector("#reveal-answer").addEventListener("click", () => {
   testAnswerRevealed = true;
-  selectedLabels = new Set(puzzles.test.answerLabels);
+  selectedLabel = puzzles.test.answer;
   activeMode = "output";
   renderCandidateButtons();
   setActiveButtons();
@@ -208,58 +203,30 @@ autoRotateInput.addEventListener("change", () => {
 
 window.addEventListener("resize", resize);
 
-function makePuzzle({ blocks, candidates }) {
-  const input = new Map();
-  const output = new Map();
-  const missing = new Set();
+function makePuzzle({ voxels, blue, candidates }) {
+  const occupied = new Set(voxels.map(([x, y, z]) => keyOf(x, y, z)));
+  const answer = candidates
+    .map((candidate) => ({ ...candidate, distance: distance(candidate.voxel, blue) }))
+    .sort((a, b) => a.distance - b.distance)[0].label;
 
-  blocks.forEach((block) => {
-    const missingInBlock = new Set(block.missingVoxels.map(([x, y, z]) => keyOf(x, y, z)));
-
-    forEachVoxel(block.min, block.max, (x, y, z) => {
-      const key = keyOf(x, y, z);
-      if (missingInBlock.has(key)) {
-        missing.add(key);
-        output.set(key, "repair");
-      } else {
-        input.set(key, "observed");
-        output.set(key, "observed");
-      }
-    });
-  });
-
-  const answerLabels = new Set(
-    candidates.filter(({ anchor, face }) => missing.has(keyOf(...targetVoxel(anchor, face)))).map(({ label }) => label),
-  );
-
-  return { input, output, missing, candidates, answerLabels };
+  return { blue, candidates, voxels, occupied, answer };
 }
 
 function render() {
   voxelGroup.clear();
 
   const puzzle = puzzles[activePuzzle];
-  const voxels = new Map();
-  puzzle.input.forEach((value, key) => voxels.set(key, value));
+  const highlightedLabel = activeMode === "output" ? puzzle.answer : selectedLabel;
+  const highlightedVoxel = puzzle.candidates.find((item) => item.label === highlightedLabel)?.voxel;
+  const highlightedKey = highlightedVoxel ? keyOf(...highlightedVoxel) : null;
 
-  if (activeMode === "output") {
-    puzzle.output.forEach((value, key) => voxels.set(key, value));
-  }
-
-  if (activePuzzle === "test" && activeMode === "workspace") {
-    selectedLabels.forEach((label) => {
-      const candidate = puzzle.candidates.find((item) => item.label === label);
-      if (candidate) voxels.set(keyOf(...targetVoxel(candidate.anchor, candidate.face)), "repair");
-    });
-  }
-
-  voxels.forEach((kind, key) => {
-    const [x, y, z] = key.split(",").map(Number);
+  puzzle.voxels.forEach(([x, y, z]) => {
+    const kind = keyOf(x, y, z) === highlightedKey ? "closest" : "body";
     addVoxel({ x, y, z, kind });
   });
+  addVoxel({ x: puzzle.blue[0], y: puzzle.blue[1], z: puzzle.blue[2], kind: "blue" });
 
   addCandidateLabels(puzzle);
-
   updateCameraTarget();
   resetCamera();
   updateJson();
@@ -267,7 +234,7 @@ function render() {
 }
 
 function addVoxel(voxel) {
-  const color = voxel.kind === "observed" ? COLORS.observed : COLORS.repair;
+  const color = voxel.kind === "blue" ? COLORS.blue : voxel.kind === "closest" ? COLORS.closest : COLORS.body;
   const geometry = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE);
   const material = new THREE.MeshStandardMaterial({
     color,
@@ -294,17 +261,19 @@ function addVoxel(voxel) {
 
 function addCandidateLabels(puzzle) {
   puzzle.candidates.forEach((candidate) => {
-    const label = makeFaceLabel(candidate.label, FACE_NORMALS[candidate.face]);
-    const [x, y, z] = candidate.anchor;
-    label.position.copy(toPosition(x, y, z));
-    label.position.add(FACE_NORMALS[candidate.face].clone().multiplyScalar(0.506));
-    label.userData.label = candidate.label;
-    label.userData.isCandidateLabel = true;
-    voxelGroup.add(label);
+    exposedFaces(candidate.voxel, puzzle.occupied).forEach((face) => {
+      const label = makeFaceLabel(candidate.label, face);
+      const [x, y, z] = candidate.voxel;
+      label.position.copy(toPosition(x, y, z));
+      label.position.add(face.normal.clone().multiplyScalar(0.506));
+      label.userData.label = candidate.label;
+      label.userData.isCandidateLabel = true;
+      voxelGroup.add(label);
+    });
   });
 }
 
-function makeFaceLabel(text, normal) {
+function makeFaceLabel(text, face) {
   const canvas = document.createElement("canvas");
   canvas.width = 160;
   canvas.height = 160;
@@ -330,7 +299,7 @@ function makeFaceLabel(text, normal) {
     side: THREE.DoubleSide,
   });
   const mesh = new THREE.Mesh(geometry, material);
-  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), face.normal);
   mesh.renderOrder = 2;
   return mesh;
 }
@@ -342,33 +311,23 @@ function renderCandidateButtons() {
     button.className = "candidate";
     button.textContent = label;
     button.type = "button";
-    button.addEventListener("click", () => toggleLabel(label));
+    button.addEventListener("click", () => selectLabel(label));
     candidateButtons.appendChild(button);
   });
   updateJson();
 }
 
-function toggleLabel(label) {
-  if (selectedLabels.has(label)) {
-    selectedLabels.delete(label);
-  } else {
-    selectedLabels.add(label);
-  }
+function selectLabel(label) {
+  selectedLabel = selectedLabel === label ? null : label;
   renderCandidateButtons();
   render();
 }
 
 function updateJson() {
-  const repairs = [...selectedLabels].sort();
-  jsonOutput.textContent = JSON.stringify({ repairs });
+  jsonOutput.textContent = JSON.stringify({ choice: selectedLabel });
   document.querySelectorAll(".candidate").forEach((button) => {
-    button.classList.toggle("is-selected", selectedLabels.has(button.textContent));
+    button.classList.toggle("is-selected", button.textContent === selectedLabel);
   });
-}
-
-function targetVoxel(anchor, face) {
-  const normal = FACE_NORMALS[face];
-  return [anchor[0] + normal.x, anchor[1] + normal.y, anchor[2] + normal.z];
 }
 
 function buildBoundaryBox() {
@@ -390,6 +349,16 @@ function pickCandidate(event) {
   return raycaster
     .intersectObjects(voxelGroup.children.filter((child) => child.userData.isCandidateLabel), false)
     .at(0);
+}
+
+function exposedFaces(voxel, occupied) {
+  const [x, y, z] = voxel;
+  return FACE_DIRECTIONS.filter(({ normal }) => {
+    const nx = x + normal.x;
+    const ny = y + normal.y;
+    const nz = z + normal.z;
+    return !occupied.has(keyOf(nx, ny, nz));
+  });
 }
 
 function setStatus() {
@@ -421,14 +390,8 @@ function setActiveButtons() {
   });
 }
 
-function forEachVoxel(min, max, callback) {
-  for (let x = min[0]; x <= max[0]; x += 1) {
-    for (let y = min[1]; y <= max[1]; y += 1) {
-      for (let z = min[2]; z <= max[2]; z += 1) {
-        callback(x, y, z);
-      }
-    }
-  }
+function distance(a, b) {
+  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 }
 
 function keyOf(x, y, z) {
@@ -782,10 +745,11 @@ function rotateVector(vector, axis, angle) {
 }
 
 function rotateHeadForTilt(fromDir, direction) {
+  const [fromX, fromY, fromZ] = fromDir;
   const upDir = vectorToDiscreteDirection(currentCameraUp);
   const next = new THREE.Vector3(...upDir)
     .normalize()
-    .sub(new THREE.Vector3(...fromDir).normalize().multiplyScalar(direction));
+    .sub(new THREE.Vector3(fromX, fromY, fromZ).normalize().multiplyScalar(direction));
   if (next.lengthSq() < 0.001) return new THREE.Vector3(...upDir).normalize();
   return new THREE.Vector3(...snapVectorToAxis(next)).normalize();
 }

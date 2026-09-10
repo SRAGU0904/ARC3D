@@ -2,12 +2,8 @@ let frame = document.querySelector("#task-frame");
 const buttons = document.querySelectorAll(".task-link");
 
 function loadTask(source) {
-  const replacement = document.createElement("iframe");
-  replacement.id = "task-frame";
-  replacement.title = "Selected ARC-3D task";
-  replacement.src = source;
-  frame.replaceWith(replacement);
-  frame = replacement;
+  if (frame.getAttribute("src") === source) return;
+  frame.src = source;
 }
 
 buttons.forEach((button) => {
@@ -29,5 +25,5 @@ window.addEventListener("message", (event) => {
 
   const query = new URLSearchParams({ variant: variantId, puzzle: caseId });
   if (seed !== null && seed !== undefined) query.set("seed", seed);
-  loadTask(`./${taskId}/?${query}`);
+  loadTask(`./tasks/${taskId}/?${query}`);
 });

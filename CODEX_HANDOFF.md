@@ -46,15 +46,15 @@ The project is a static Three.js demo with one main page and three task pages:
 
 ```text
 ARC3D.html
-task1/index.html
-task1/main.js
-task1/styles.css
-task2/index.html
-task2/main.js
-task2/styles.css
-task3/index.html
-task3/main.js
-task3/styles.css
+tasks/task1/index.html
+tasks/task1/main.js
+tasks/task1/styles.css
+tasks/task2/index.html
+tasks/task2/main.js
+tasks/task2/styles.css
+tasks/task3/index.html
+tasks/task3/main.js
+tasks/task3/styles.css
 ```
 
 `ARC3D.html` shows all three tasks through a top navigation layout. Each task has two examples and one test.
@@ -87,15 +87,15 @@ Current concept:
 Key files:
 
 ```text
-task1/main.js
-task1/index.html
-task1/styles.css
+tasks/task1/main.js
+tasks/task1/index.html
+tasks/task1/styles.css
 ```
 
 Where to edit examples and tests:
 
 ```text
-task1/main.js
+tasks/task1/variants/base.js
 ```
 
 Look for:
@@ -127,7 +127,7 @@ Important design preference:
 Where to edit the shape, blue cube, and candidates:
 
 ```text
-task2/main.js
+tasks/task2/variants/base.js
 ```
 
 Look for:
@@ -162,7 +162,7 @@ Current concept:
 Where to edit examples and test:
 
 ```text
-task3/main.js
+tasks/task3/variants/base.js
 ```
 
 Look for:
@@ -177,7 +177,7 @@ const puzzles = {
 
 Color customization:
 
-Voxel definitions can support custom colors if the puzzle data passes color information to the voxel-rendering logic. If adding or changing colors, inspect `addVoxel(...)` in `task3/main.js`.
+Voxel definitions can support custom colors if the puzzle data passes color information to the voxel-rendering logic. If adding or changing colors, inspect `addVoxel(...)` in `tasks/task3/main.js`.
 
 ## Camera Modes
 
@@ -223,9 +223,9 @@ function getNextView(move) { ... }
 Location:
 
 ```text
-task1/main.js
-task2/main.js
-task3/main.js
+tasks/task1/main.js
+tasks/task2/main.js
+tasks/task3/main.js
 ```
 
 The three versions should remain synchronized.
@@ -306,7 +306,7 @@ Each task HTML file imports its JS with a version query, for example:
 
 If browser caching causes old behavior:
 
-- increment the `v=...` string in each `task*/index.html`
+- use `dev_server.py`, which disables browser caching and watches `tasks/task*/`
 - hard refresh with `Cmd + Shift + R`
 - or start a local server on a fresh port
 
@@ -315,28 +315,28 @@ If browser caching causes old behavior:
 Check syntax:
 
 ```bash
-node --check "/Users/ruyinfeng/Desktop/axa repo/ARC3D/task1/main.js"
-node --check "/Users/ruyinfeng/Desktop/axa repo/ARC3D/task2/main.js"
-node --check "/Users/ruyinfeng/Desktop/axa repo/ARC3D/task3/main.js"
+node --check "/Users/b789ll/Desktop/axa repo/ARC3D/tasks/task1/main.js"
+node --check "/Users/b789ll/Desktop/axa repo/ARC3D/tasks/task2/main.js"
+node --check "/Users/b789ll/Desktop/axa repo/ARC3D/tasks/task3/main.js"
 ```
 
 Run page:
 
 ```bash
 cd "/Users/ruyinfeng/Desktop/axa repo/ARC3D"
-python3 -m http.server 4180
+python3 dev_server.py --port 4181
 ```
 
 Open:
 
 ```text
-http://localhost:4180/ARC3D.html
+http://localhost:4181/
 ```
 
 ## Recommended Next Steps
 
 1. Test fixed camera behavior manually in `task1` example 2.
-2. If camera logic feels stable, extract shared camera code into one common JS file so task1/task2/task3 do not drift.
+2. If camera logic feels stable, extract shared camera code into one common JS file so the three task renderers do not drift.
 3. Clean unused old helper functions from each `main.js`.
 4. Add comments around puzzle data blocks so manual editing of examples is easier.
 5. Consider adding a small debug panel that can force a specific `view/head` state for testing camera transitions.

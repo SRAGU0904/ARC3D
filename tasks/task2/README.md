@@ -16,7 +16,7 @@ a JSON action:
 {"choice":"B"}
 ```
 
-Object shape is defined in `../tasks/task2/variants/base.js`:
+Object shape is defined in `variants/base.js`:
 
 ```js
 voxels: [
@@ -42,11 +42,11 @@ the blue cube is computed automatically.
   reduces broad face-adjacent voxel connections and relocates the blue cube and
   candidate positions while reusing the same two solved examples.
 
-Puzzle data lives in `../tasks/task2/variants/`. The revised variant can be
+Puzzle data lives in `variants/`. The revised variant can be
 opened directly with:
 
 ```text
-http://localhost:4181/task2/?variant=reduced-face-adjacency&puzzle=test
+http://localhost:4181/tasks/task2/?variant=reduced-face-adjacency&puzzle=test
 ```
 
 Its benchmark images live under

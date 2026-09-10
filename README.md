@@ -7,7 +7,7 @@ The website is now data-driven while keeping the original task-page layout.
 - `tasks/catalog.js` is the central task catalog used by the documentation page.
 - `tasks/taskN/index.js` contains task-level metadata and registers its variants.
 - `tasks/taskN/variants/*.js` contains the actual example and test puzzle data.
-- `taskN/main.js` is the task-specific renderer and should not contain puzzle coordinates.
+- `tasks/taskN/index.html`, `main.js`, and `styles.css` contain that task's webpage and renderer.
 - `documentation.html` presents every registered task, variant, and case.
 
 Open the project with the no-cache, auto-reload development server:
@@ -44,7 +44,7 @@ Open it from Documentation, then enter a seed in the top-right control, or use
 a direct URL:
 
 ```text
-http://localhost:4181/task2/?variant=label-permutation&puzzle=test&seed=42
+http://localhost:4181/tasks/task2/?variant=label-permutation&puzzle=test&seed=42
 ```
 
 The same seed always reproduces the same labels. Changing the seed generates a

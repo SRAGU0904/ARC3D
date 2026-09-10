@@ -63,12 +63,12 @@ fixed view 中包含 14 个固定视角。
 
 当前 git 状态里相关修改主要在：
 
-- `task1/index.html`
-- `task1/main.js`
-- `task2/index.html`
-- `task2/main.js`
-- `task3/index.html`
-- `task3/main.js`
+- `tasks/task1/index.html`
+- `tasks/task1/main.js`
+- `tasks/task2/index.html`
+- `tasks/task2/main.js`
+- `tasks/task3/index.html`
+- `tasks/task3/main.js`
 
 ### 2. 渲染图
 
@@ -280,7 +280,7 @@ python3 -m arc3d_benchmark.benchmark_main --task 3
 可以把下面这段发给新 Codex：
 
 ```text
-请先完整阅读当前 ARC3D 项目，尤其是 ARC3D_WORK_TRANSFER.md、arc3d_benchmark/、rendered_puzzle_images/、task1/task2/task3。这个项目是一个受 ARC 启发的 3D puzzle benchmark。当前 benchmark 已支持一次只测试一个 task，输入为每个 puzzle 的 14 张 fixed-view PNG，examples 带 answer，test 不在 prompt 中显示 answer，evaluation 会比较模型输出的 A/B/C/D/E，且多选顺序无关。请先运行 python3 -m arc3d_benchmark.benchmark_main --task 1 --dry-run 确认环境，然后继续协助我完善 benchmark。
+请先完整阅读当前 ARC3D 项目，尤其是 ARC3D_WORK_TRANSFER.md、arc3d_benchmark/、rendered_puzzle_images/、tasks/task1、tasks/task2、tasks/task3。这个项目是一个受 ARC 启发的 3D puzzle benchmark。当前 benchmark 已支持一次只测试一个 task，输入为每个 puzzle 的 14 张 fixed-view PNG，examples 带 answer，test 不在 prompt 中显示 answer，evaluation 会比较模型输出的 A/B/C/D/E，且多选顺序无关。请先运行 python3 -m arc3d_benchmark.benchmark_main --task 1 --dry-run 确认环境，然后继续协助我完善 benchmark。
 ```
 
 ## 目前建议的下一步

@@ -14,7 +14,7 @@ Expected answer format:
 {"choice":"A"}
 ```
 
-Edit the relevant case in `../tasks/task3/variants/base.js`, or create and
+Edit the relevant case in `variants/base.js`, or create and
 register another variant, to move the labels:
 
 ```js
@@ -36,7 +36,7 @@ the label is attached and where the green repair cube will be added.
 Open the control variant directly with:
 
 ```text
-http://localhost:4181/task3/?variant=junction-bias-control&puzzle=example2
+http://localhost:4181/tasks/task3/?variant=junction-bias-control&puzzle=example2
 ```
 
 Its benchmark images live under

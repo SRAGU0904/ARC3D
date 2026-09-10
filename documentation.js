@@ -80,7 +80,7 @@ function renderTask(task) {
       link.className = "case-link";
       const query = new URLSearchParams({ variant: variant.id, puzzle: caseId });
       if (variant.id === "label-permutation") query.set("seed", "0");
-      link.href = `./${task.id}/?${query}`;
+      link.href = `./tasks/${task.id}/?${query}`;
       link.textContent = caseId;
       link.addEventListener("click", (event) => {
         if (window.parent === window) return;

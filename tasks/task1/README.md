@@ -34,7 +34,7 @@ state where the user or model selects labeled candidate positions such as `A`,
 target repaired object.
 
 To make a puzzle easier or harder, edit `missingVoxels` and `candidates` in
-`../tasks/task1/variants/base.js`, or create and register another variant. Each
+`variants/base.js`, or create and register another variant. Each
 missing voxel is one visible surface block removed from the
 completed cuboid:
 
@@ -64,16 +64,16 @@ it is a distractor.
 
 ## Run locally
 
-From this directory:
+From the project root:
 
 ```sh
-python3 -m http.server 4173
+python3 dev_server.py --port 4181
 ```
 
 Then open:
 
 ```text
-http://localhost:4173/
+http://localhost:4181/tasks/task1/
 ```
 
 The page imports Three.js from jsDelivr, so the browser needs internet access

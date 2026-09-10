@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { TrackballControls } from "three/addons/controls/TrackballControls.js";
-import { taskDefinition } from "../tasks/task3/index.js";
-import { materializeVariant, normalizeSeed, setupLabelSeedControl } from "../tasks/label-permutation.js";
+import { taskDefinition } from "./index.js";
+import { materializeVariant, normalizeSeed, setupLabelSeedControl } from "../label-permutation.js";
 
 const COLORS = {
   body: "#ff8a24",
