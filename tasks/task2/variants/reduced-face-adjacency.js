@@ -2,10 +2,11 @@ import { baseVariant } from "./base.js";
 
 export const reducedFaceAdjacencyVariant = {
   id: "reduced-face-adjacency",
-  title: "Reduced Face Adjacency",
-  description: "A Task 2 variation with fewer broad face-adjacent voxel connections.",
+  title: "Reduced Face Adjacency (Base)",
+  description:
+    "A robustness control derived from the nearest-distance Base, with fewer face-adjacent connections in the test structure.",
   changeSummary:
-    "The examples stay fixed. The test uses the revised sparse structure, a relocated blue cube, and updated candidates from test_v1.",
+    "The examples stay fixed, while the test uses a sparser structure, a relocated blue cube, and updated candidates.",
   status: "ready",
   examples: ["example1", "example2"],
   tests: ["test"],

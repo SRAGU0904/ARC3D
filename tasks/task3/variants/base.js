@@ -1,7 +1,7 @@
 export const baseVariant = {
   id: "base",
-  title: "Base",
-  description: "Original mirror-completion puzzle set.",
+  title: "Base: Chiral Correspondence",
+  description: "Complete the correspondence between two opposite-handed 3D structures by locating the missing voxel.",
   status: "ready",
   examples: ["example1", "example2"],
   tests: ["test"],

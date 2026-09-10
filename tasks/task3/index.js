@@ -6,9 +6,9 @@ import { defineTask } from "../schema.js";
 export const taskDefinition = defineTask({
   id: "task3",
   title: "Task 3",
-  subtitle: "Mirror Completion",
-  summary: "Complete the correspondence between the orange and green voxel structures.",
-  rule: "Infer the structural symmetry and select the labeled face where the missing voxel belongs.",
+  subtitle: "Symmetry Pattern",
+  summary: "Infer the spatial symmetry connecting the orange and green voxel structures.",
+  rule: "Reconstruct the correspondence between the two structures, then select the labeled face where the missing symmetric voxel belongs.",
   answerFormat: "single-select",
   defaultVariant: "base",
   variants: {

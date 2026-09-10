@@ -1,7 +1,7 @@
 export const baseVariant = {
   id: "base",
-  title: "Base",
-  description: "Original closest-candidate puzzle set.",
+  title: "Base: Nearest Distance",
+  description: "Select the labeled candidate nearest to the separate blue reference voxel.",
   status: "ready",
   examples: ["example1", "example2"],
   tests: ["test"],

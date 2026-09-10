@@ -2,10 +2,11 @@ import { baseVariant } from "./base.js";
 
 export const junctionBiasControlVariant = {
   id: "junction-bias-control",
-  title: "Junction Bias Control",
-  description: "A Task 3 control variant designed to reduce junction-position shortcuts.",
+  title: "Junction Bias Control (Base)",
+  description:
+    "A robustness control derived from the mirror-completion Base, designed to reduce junction-position shortcuts.",
   changeSummary:
-    "Only Example 2 changes. Its correct repair is moved away from the original junction pattern while Example 1 and the held-out Test remain fixed.",
+    "Only Example 2 changes: its correct repair moves away from the original junction pattern.",
   status: "ready",
   examples: ["example1", "example2"],
   tests: ["test"],

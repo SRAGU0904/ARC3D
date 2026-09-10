@@ -6,9 +6,9 @@ import { defineTask } from "../schema.js";
 export const taskDefinition = defineTask({
   id: "task2",
   title: "Task 2",
-  subtitle: "Nearest Candidate",
-  summary: "Choose the labeled object voxel closest to the separate blue voxel.",
-  rule: "Reconstruct candidate and blue positions across views, then compare their 3D distances.",
+  subtitle: "Spatial Distance",
+  summary: "Compare the 3D distances between a separate blue reference voxel and labeled candidate voxels.",
+  rule: "Reconstruct all positions across views, calculate their spatial distances, and apply the relation specified by the variant.",
   answerFormat: "single-select",
   defaultVariant: "base",
   variants: {

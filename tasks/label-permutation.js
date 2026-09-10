@@ -3,10 +3,11 @@ const DEFAULT_SEED = "0";
 export function createLabelPermutationVariant(taskId, baseVariant) {
   return {
     id: "label-permutation",
-    title: "Label Permutation",
-    description: "A seeded robustness variant that reassigns candidate labels without changing puzzle geometry.",
+    title: "Label Permutation (Base)",
+    description:
+      "A seeded robustness control derived from Base that reassigns candidate labels without changing the task rule or puzzle geometry.",
     changeSummary:
-      "Each case derives its own deterministic label permutation from the task id, case id, and URL seed.",
+      "Only candidate labels change. Each case derives a reproducible permutation from the seed.",
     status: "ready",
     examples: [...baseVariant.examples],
     tests: [...baseVariant.tests],

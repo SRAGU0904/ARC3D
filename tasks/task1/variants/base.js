@@ -1,7 +1,7 @@
 export const baseVariant = {
   id: "base",
-  title: "Base",
-  description: "Original multi-block surface-repair puzzle set.",
+  title: "Base: Surface Repair",
+  description: "The base spatial-completion condition: repair the missing surface voxels of incomplete solid blocks.",
   status: "ready",
   examples: ["example1", "example2"],
   tests: ["test"],
