@@ -31,7 +31,7 @@
   ],
   "variants": {
     "task1": ["base"],
-    "task2": ["base", "reduced-face-adjacency"],
+    "task2": ["base", "furthest-distance", "reduced-face-adjacency"],
     "task3": ["base", "junction-bias-control"]
   },
   "puzzles": [

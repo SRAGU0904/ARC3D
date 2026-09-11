@@ -152,6 +152,7 @@ document.querySelectorAll(".tab").forEach((button) => {
     const puzzleUrl = new URL(window.location.href);
     puzzleUrl.searchParams.set("puzzle", activePuzzle);
     window.history.replaceState(null, "", puzzleUrl);
+    notifyArc3dParentLocation();
     activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
     selectedLabel = null;
     testAnswerRevealed = false;
@@ -171,7 +172,7 @@ document.querySelectorAll(".mode").forEach((button) => {
     if (activePuzzle === "test" && button.dataset.mode === "output" && !testAnswerRevealed) return;
     activeMode = button.dataset.mode;
     setActiveButtons();
-    render();
+    render({ preserveCamera: true });
   });
 });
 
@@ -203,16 +204,17 @@ autoRotateInput.addEventListener("change", () => {
 
 window.addEventListener("resize", resize);
 
-function makePuzzle({ voxels, blue, candidates }) {
+function makePuzzle({ voxels, blue, candidates, distanceRule = "nearest" }) {
   const occupied = new Set(voxels.map(([x, y, z]) => keyOf(x, y, z)));
+  const sortDirection = distanceRule === "furthest" ? -1 : 1;
   const answer = candidates
     .map((candidate) => ({ ...candidate, distance: distance(candidate.voxel, blue) }))
-    .sort((a, b) => a.distance - b.distance)[0].label;
+    .sort((a, b) => sortDirection * (a.distance - b.distance))[0].label;
 
-  return { blue, candidates, voxels, occupied, answer };
+  return { blue, candidates, voxels, occupied, answer, distanceRule };
 }
 
-function render() {
+function render({ preserveCamera = false } = {}) {
   voxelGroup.clear();
 
   const puzzle = puzzles[activePuzzle];
@@ -227,8 +229,10 @@ function render() {
   addVoxel({ x: puzzle.blue[0], y: puzzle.blue[1], z: puzzle.blue[2], kind: "blue" });
 
   addCandidateLabels(puzzle);
-  updateCameraTarget();
-  resetCamera();
+  if (!preserveCamera) {
+    updateCameraTarget();
+    resetCamera();
+  }
   updateJson();
   setStatus();
 }

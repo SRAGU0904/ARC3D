@@ -35,6 +35,17 @@ blue: [8, 4, 5]
 Candidate positions are defined under `candidates`. The closest candidate to
 the blue cube is computed automatically.
 
+## Furthest Distance variant
+
+Open `?variant=furthest-distance` to invert the Base relation and select the
+candidate with the greatest Euclidean distance from the blue reference voxel.
+The geometry remains unchanged. Example 1 swaps labels A and D, Example 2 swaps
+labels B and D, and Test keeps the Base labels. The resulting webpage answers
+are Example 1 = A, Example 2 = B, and Test = D.
+
+Each case in this variant sets `distanceRule: "furthest"`. Omitting that field
+keeps the renderer's existing nearest-distance behavior.
+
 ## Variants
 
 - `base` preserves the original test from the red side of the historical diff.

@@ -1,6 +1,14 @@
 const scope = window.location.pathname;
 const versionEndpoint = `/__arc3d_version?scope=${encodeURIComponent(scope)}`;
 
+function notifyArc3dParentLocation() {
+  if (window.parent === window) return;
+  window.parent.postMessage(
+    { type: "arc3d:location-changed", href: window.location.href },
+    window.location.origin,
+  );
+}
+
 let loadedVersion = null;
 let reloadStarted = false;
 
@@ -25,3 +33,6 @@ async function checkForSavedChanges() {
 
 checkForSavedChanges();
 window.setInterval(checkForSavedChanges, 500);
+notifyArc3dParentLocation();
+window.addEventListener("hashchange", notifyArc3dParentLocation);
+window.addEventListener("popstate", notifyArc3dParentLocation);

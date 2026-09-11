@@ -35,7 +35,10 @@ function selectTask(taskId, updateUrl = false) {
   });
 
   renderTask(task);
-  if (updateUrl) window.history.replaceState(null, "", `#${task.id}`);
+  if (updateUrl) {
+    window.history.replaceState(null, "", `#${task.id}`);
+    notifyArc3dParentLocation();
+  }
 }
 
 function renderTask(task) {

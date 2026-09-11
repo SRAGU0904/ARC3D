@@ -25,6 +25,16 @@ Copy the relevant task's `variants/base.js`, give the exported variant a stable
 ID, then import and register it in that task's `index.js`. A variant owns its
 example/test case data and becomes visible on the generated Documentation page.
 
+Task 2 includes a `furthest-distance` variant that keeps the Base geometry but
+selects the candidate with the greatest Euclidean distance from the blue voxel:
+
+```text
+http://localhost:4181/tasks/task2/?variant=furthest-distance&puzzle=test
+```
+
+Its current webpage puzzle settings swap A/D in Example 1 and B/D in Example 2,
+while Test keeps the Base labels. The resulting answers are A, B, and D.
+
 Rendered benchmark images for new variants should use:
 
 ```text
@@ -33,6 +43,28 @@ rendered_puzzle_images/taskN/variant-id/case-id/view-id.png
 
 The original flat `taskN/case-id` image folders remain supported as the `base`
 variant for backward compatibility.
+
+Task 3 includes a `y-axis-correspondence` variant that places the unchanged
+orange structures above their opposite-handed green correspondences:
+
+```text
+http://localhost:4181/tasks/task3/?variant=y-axis-correspondence&puzzle=example1
+```
+
+Task 3 also includes a `rotational-correspondence` variant whose green structures are
+obtained from the unchanged orange structures by a 180-degree rotation around
+the y axis:
+
+```text
+http://localhost:4181/tasks/task3/?variant=rotational-correspondence&puzzle=example1
+```
+
+The `point-symmetric-correspondence` variant keeps the orange structures in
+place and constructs the green structures by central inversion through a point:
+
+```text
+http://localhost:4181/tasks/task3/?variant=point-symmetric-correspondence&puzzle=example1
+```
 
 ### Seeded label-permutation variant
 

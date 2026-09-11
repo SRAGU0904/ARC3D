@@ -1,4 +1,5 @@
 import { baseVariant } from "./variants/base.js";
+import { furthestDistanceVariant } from "./variants/furthest-distance.js";
 import { labelPermutationVariant } from "./variants/label-permutation.js";
 import { reducedFaceAdjacencyVariant } from "./variants/reduced-face-adjacency.js";
 import { defineTask } from "../schema.js";
@@ -13,6 +14,7 @@ export const taskDefinition = defineTask({
   defaultVariant: "base",
   variants: {
     base: baseVariant,
+    "furthest-distance": furthestDistanceVariant,
     "label-permutation": labelPermutationVariant,
     "reduced-face-adjacency": reducedFaceAdjacencyVariant,
   },

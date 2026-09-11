@@ -1,7 +1,7 @@
 export const baseVariant = {
   id: "base",
   title: "Base: Surface Repair",
-  description: "The base spatial-completion condition: repair the missing surface voxels of incomplete solid blocks.",
+  description: "Repair incomplete 3D solid blocks by identifying their missing surface voxels.",
   status: "ready",
   examples: ["example1", "example2"],
   tests: ["test"],

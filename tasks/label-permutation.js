@@ -4,8 +4,7 @@ export function createLabelPermutationVariant(taskId, baseVariant) {
   return {
     id: "label-permutation",
     title: "Label Permutation (Base)",
-    description:
-      "A seeded robustness control derived from Base that reassigns candidate labels without changing the task rule or puzzle geometry.",
+    description: baseVariant.description,
     changeSummary:
       "Only candidate labels change. Each case derives a reproducible permutation from the seed.",
     status: "ready",

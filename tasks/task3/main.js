@@ -151,6 +151,7 @@ document.querySelectorAll(".tab").forEach((button) => {
     const puzzleUrl = new URL(window.location.href);
     puzzleUrl.searchParams.set("puzzle", activePuzzle);
     window.history.replaceState(null, "", puzzleUrl);
+    notifyArc3dParentLocation();
     activeMode = activePuzzle.startsWith("example") ? "input" : "workspace";
     selectedLabel = null;
     testAnswerRevealed = false;
@@ -170,7 +171,7 @@ document.querySelectorAll(".mode").forEach((button) => {
     if (activePuzzle === "test" && button.dataset.mode === "output" && !testAnswerRevealed) return;
     activeMode = button.dataset.mode;
     setActiveButtons();
-    render();
+    render({ preserveCamera: true });
   });
 });
 
@@ -208,7 +209,7 @@ function makePuzzle({ mirrorX, voxels, missing, candidates }) {
   return { mirrorX, voxels, missing, candidates, answer };
 }
 
-function render() {
+function render({ preserveCamera = false } = {}) {
   voxelGroup.clear();
 
   const puzzle = puzzles[activePuzzle];
@@ -232,8 +233,10 @@ function render() {
   }
 
   addCandidateLabels(puzzle);
-  updateCameraTarget();
-  resetCamera();
+  if (!preserveCamera) {
+    updateCameraTarget();
+    resetCamera();
+  }
   updateJson();
   setStatus();
 }
